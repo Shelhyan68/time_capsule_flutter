@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "465196584764",
+    "project_id": "time-capsule-5ecb5",
+    "storage_bucket": "time-capsule-5ecb5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:465196584764:android:e5a9c17efc950336d29839",
+        "android_client_info": {
+          "package_name": "com.example.time_capsule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "465196584764-pqostadol8psdlj403kgnorv198pb9be.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.time_capsule",
+            "certificate_hash": "01174291b67af4d220e8110db7bb5c9e8eca350e"
+          }
+        },
+        {
+          "client_id": "465196584764-l75olv7841u0aen9ram2jqsf6u283700.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuAb_-KCQEosSyrkofti_Y3GwQ1h33t1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "465196584764-l75olv7841u0aen9ram2jqsf6u283700.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "465196584764-eiqn93bh1kf0ibaqsdugeqnpnaq5dp4n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.timeCapsule"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
