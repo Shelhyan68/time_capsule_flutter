@@ -1,12 +1,14 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
+import '/src/features/auth/data/auth_repository.dart';
+import '/src/features/capsule/domain/models/capsule_model.dart';
 
 class CreateCapsulePage extends StatefulWidget {
-  const CreateCapsulePage({Key? key}) : super(key: key);
+  const CreateCapsulePage({super.key});
 
   @override
   State<CreateCapsulePage> createState() => _CreateCapsulePageState();
@@ -14,17 +16,23 @@ class CreateCapsulePage extends StatefulWidget {
 
 class _CreateCapsulePageState extends State<CreateCapsulePage> {
   final _titleController = TextEditingController();
+  final _letterController =
+      TextEditingController(); // Nouveau champ pour la lettre
+  final ImagePicker _imagePicker = ImagePicker();
+
   DateTime? _openDate;
   final List<File> _mediaFiles = [];
 
-  final ImagePicker _imagePicker = ImagePicker();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _titleController.dispose();
+    _letterController.dispose();
     super.dispose();
   }
 
+  // ─── Date ──────────────────────────────────────────────
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -32,9 +40,12 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
-    if (picked != null) setState(() => _openDate = picked);
+    if (picked != null) {
+      setState(() => _openDate = picked);
+    }
   }
 
+  // ─── Médias ────────────────────────────────────────────
   Future<void> _pickImage() async {
     final picked = await _imagePicker.pickImage(source: ImageSource.gallery);
     if (picked != null) setState(() => _mediaFiles.add(File(picked.path)));
@@ -45,145 +56,232 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
     if (picked != null) setState(() => _mediaFiles.add(File(picked.path)));
   }
 
-  Future<void> _pickDocument() async {
-    final result = await FilePicker.platform.pickFiles();
-    if (result != null && result.files.isNotEmpty) {
-      setState(() => _mediaFiles.add(File(result.files.first.path!)));
-    }
-  }
-
+  // ─── Sauvegarde ────────────────────────────────────────
   Future<void> _saveCapsule() async {
     if (_titleController.text.isEmpty || _openDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir le titre et la date')),
-      );
+      _showMessage('Titre et date requis');
       return;
     }
 
-    // Afficher un indicateur de chargement
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
+    setState(() => _isLoading = true);
 
     try {
-      // 1. Uploader les fichiers vers Firebase Storage
       final List<String> mediaUrls = [];
+
       for (final file in _mediaFiles) {
         final fileName =
             '${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
-        final storageRef = FirebaseStorage.instance.ref().child(
-          'capsules/$fileName',
-        );
-        await storageRef.putFile(file);
-        final downloadUrl = await storageRef.getDownloadURL();
-        mediaUrls.add(downloadUrl);
+
+        final ref = FirebaseStorage.instance.ref().child('capsules/$fileName');
+
+        await ref.putFile(file);
+        final url = await ref.getDownloadURL();
+        mediaUrls.add(url);
       }
 
-      // 2. Créer le document dans Firestore
-      await FirebaseFirestore.instance.collection('capsules').add({
-        'title': _titleController.text,
-        'openDate': Timestamp.fromDate(_openDate!),
-        'mediaUrls': mediaUrls,
-        'createdAt': Timestamp.now(),
-      });
+      final capsule = CapsuleModel(
+        id: '', // Firestore va générer l'id
+        title: _titleController.text,
+        openDate: _openDate!,
+        mediaUrls: mediaUrls,
+        letter: _letterController.text.isEmpty ? null : _letterController.text,
+      );
 
-      // Fermer le dialogue de chargement
-      if (mounted) Navigator.of(context).pop();
+      await FirebaseFirestore.instance
+          .collection('capsules')
+          .add(capsule.toFirestore());
 
-      // Afficher un message de succès
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Capsule créée avec succès !')),
-        );
-        Navigator.of(context).pop();
-      }
+      if (!mounted) return;
+
+      _showMessage('Capsule scellée dans le temps');
+      Navigator.pop(context);
     } catch (e) {
-      // Fermer le dialogue de chargement
-      if (mounted) Navigator.of(context).pop();
-
-      // Afficher l'erreur
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erreur : $e')));
-      }
+      _showMessage('Erreur : $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // ─── UI ────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final authRepository = AuthRepository();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Créer une capsule')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Titre de la capsule',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _openDate != null
-                        ? 'Date d’ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}'
-                        : 'Aucune date sélectionnée',
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Crée une capsule temporelle',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Quitter le flux',
+            onPressed: () async {
+              try {
+                authRepository.logout();
+              } catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(e.toString())));
+              }
+            },
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF0B0F1A),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 480),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: Colors.white.withOpacity(0.12)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Sceller une capsule',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Conserve un fragment du présent pour le futur',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Titre
+                      TextField(
+                        controller: _titleController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: _inputDecoration('Titre de la capsule'),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Lettre / texte
+                      TextField(
+                        controller: _letterController,
+                        style: const TextStyle(color: Colors.white),
+                        maxLines: 5,
+                        decoration: _inputDecoration(
+                          'Écris une lettre ou un texte',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Date
+                      OutlinedButton.icon(
+                        onPressed: _pickDate,
+                        icon: const Icon(Icons.calendar_month),
+                        label: Text(
+                          _openDate == null
+                              ? 'Choisir la date d’ouverture'
+                              : 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}',
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Médias
+                      Wrap(
+                        spacing: 12,
+                        children: [
+                          _mediaButton(Icons.photo, 'Photo', _pickImage),
+                          _mediaButton(Icons.videocam, 'Vidéo', _pickVideo),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Liste médias
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _mediaFiles.length,
+                          itemBuilder: (_, index) {
+                            final file = _mediaFiles[index];
+                            return ListTile(
+                              leading: const Icon(
+                                Icons.attach_file,
+                                color: Colors.white70,
+                              ),
+                              title: Text(
+                                file.path.split('/').last,
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      // Bouton sauvegarde
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: _isLoading ? null : _saveCapsule,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Sceller la capsule'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: _pickDate,
-                  child: const Text('Choisir la date'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.photo),
-                  label: const Text('Photo'),
-                  onPressed: _pickImage,
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.videocam),
-                  label: const Text('Vidéo'),
-                  onPressed: _pickVideo,
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.insert_drive_file),
-                  label: const Text('Document'),
-                  onPressed: _pickDocument,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _mediaFiles.length,
-                itemBuilder: (_, index) {
-                  final file = _mediaFiles[index];
-                  return ListTile(
-                    leading: const Icon(Icons.attach_file),
-                    title: Text(file.path.split('/').last),
-                  );
-                },
               ),
             ),
-            ElevatedButton(
-              onPressed: _saveCapsule,
-              child: const Text('Enregistrer la capsule'),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white60),
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.05),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  Widget _mediaButton(IconData icon, String label, VoidCallback onTap) {
+    return OutlinedButton.icon(
+      icon: Icon(icon),
+      label: Text(label),
+      onPressed: onTap,
     );
   }
 }

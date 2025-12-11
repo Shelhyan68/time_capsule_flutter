@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'features/capsule/presentation/pages/dashboard_page.dart';
 import 'features/capsule/presentation/pages/create_capsule_page.dart';
 import 'features/capsule/presentation/pages/open_capsule_page.dart';
-import 'features/capsule/presentation/models/capsule_model.dart';
+import 'features/capsule/domain/models/capsule_model.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {

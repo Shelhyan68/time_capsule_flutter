@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CapsuleModel {
-  final String id; // ID Firestore
+  final String id;
   final String title;
-  final String? letter; // texte/lettre de l'utilisateur
-  final List<String> mediaUrls; // images, vidéos, documents
+  final String? letter;
+  final List<String> mediaUrls;
   final DateTime openDate;
 
   CapsuleModel({

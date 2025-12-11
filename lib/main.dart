@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'src/features/auth/data/auth_repository.dart';
 import 'src/features/auth/presentation/pages/login_page.dart';
 import 'src/features/capsule/presentation/pages/dashboard_page.dart';
+import 'src/app_router.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -22,6 +23,7 @@ class TimeCapsuleApp extends StatelessWidget {
     return MaterialApp(
       title: 'TimeCapsule',
       theme: ThemeData(primarySwatch: Colors.blue),
+      onGenerateRoute: AppRouter.generateRoute,
       home: StreamBuilder<User?>(
         stream: authRepository.authStateChanges(),
         builder: (context, snapshot) {
