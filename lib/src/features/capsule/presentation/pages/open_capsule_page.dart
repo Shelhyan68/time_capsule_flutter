@@ -220,6 +220,73 @@ class _OpenCapsulePageState extends State<OpenCapsulePage>
                             color: Colors.white70,
                           ),
                         ),
+                        if (widget.capsule.recipientEmail != null) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.blue.shade200.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade200.withOpacity(
+                                      0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.email_outlined,
+                                    color: Colors.blue.shade200,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Envoyée à',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: Colors.white54,
+                                              fontSize: 11,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        widget.capsule.recipientName ??
+                                            'Destinataire',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        widget.capsule.recipientEmail!,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: Colors.blue.shade200,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         Expanded(
                           child: AnimatedOpacity(
