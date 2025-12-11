@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/capsule/domain/models/capsule_model.dart';
+import '/src/core/widgets/space_background.dart';
 
 class CreateCapsulePage extends StatefulWidget {
   const CreateCapsulePage({super.key});
@@ -114,146 +115,148 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
     final theme = Theme.of(context);
     final authRepository = AuthRepository();
 
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
+    return SpaceBackground(
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Crée une capsule temporelle',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Quitter le flux',
-            onPressed: () async {
-              try {
-                authRepository.logout();
-              } catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(e.toString())));
-              }
-            },
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text(
+            'Crée une capsule temporelle',
+            style: TextStyle(color: Colors.white),
           ),
-        ],
-      ),
-      backgroundColor: const Color(0xFF0B0F1A),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: Colors.white.withOpacity(0.12)),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Sceller une capsule',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Quitter le flux',
+              onPressed: () async {
+                try {
+                  authRepository.logout();
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(color: Colors.white.withOpacity(0.12)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Sceller une capsule',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Conserve un fragment du présent pour le futur',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Conserve un fragment du présent pour le futur',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                      // Titre
-                      TextField(
-                        controller: _titleController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Titre de la capsule'),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Lettre / texte
-                      TextField(
-                        controller: _letterController,
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 5,
-                        decoration: _inputDecoration(
-                          'Écris une lettre ou un texte',
+                        // Titre
+                        TextField(
+                          controller: _titleController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('Titre de la capsule'),
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      // Date
-                      OutlinedButton.icon(
-                        onPressed: _pickDate,
-                        icon: const Icon(Icons.calendar_month),
-                        label: Text(
-                          _openDate == null
-                              ? 'Choisir la date d’ouverture'
-                              : 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}',
+                        // Lettre / texte
+                        TextField(
+                          controller: _letterController,
+                          style: const TextStyle(color: Colors.white),
+                          maxLines: 5,
+                          decoration: _inputDecoration(
+                            'Écris une lettre ou un texte',
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      // Médias
-                      Wrap(
-                        spacing: 12,
-                        children: [
-                          _mediaButton(Icons.photo, 'Photo', _pickImage),
-                          _mediaButton(Icons.videocam, 'Vidéo', _pickVideo),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Liste médias
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _mediaFiles.length,
-                          itemBuilder: (_, index) {
-                            final file = _mediaFiles[index];
-                            return ListTile(
-                              leading: const Icon(
-                                Icons.attach_file,
-                                color: Colors.white70,
-                              ),
-                              title: Text(
-                                file.path.split('/').last,
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                            );
-                          },
+                        // Date
+                        OutlinedButton.icon(
+                          onPressed: _pickDate,
+                          icon: const Icon(Icons.calendar_month),
+                          label: Text(
+                            _openDate == null
+                                ? 'Choisir la date d’ouverture'
+                                : 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}',
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
 
-                      // Bouton sauvegarde
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: _isLoading ? null : _saveCapsule,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Text('Sceller la capsule'),
+                        // Médias
+                        Wrap(
+                          spacing: 12,
+                          children: [
+                            _mediaButton(Icons.photo, 'Photo', _pickImage),
+                            _mediaButton(Icons.videocam, 'Vidéo', _pickVideo),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+
+                        // Liste médias
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _mediaFiles.length,
+                            itemBuilder: (_, index) {
+                              final file = _mediaFiles[index];
+                              return ListTile(
+                                leading: const Icon(
+                                  Icons.attach_file,
+                                  color: Colors.white70,
+                                ),
+                                title: Text(
+                                  file.path.split('/').last,
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        // Bouton sauvegarde
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton(
+                            onPressed: _isLoading ? null : _saveCapsule,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Text('Sceller la capsule'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -56,7 +56,42 @@ class OpenedCapsuleContent extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(url, fit: BoxFit.cover),
+                child: Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.error_outline,
+                          color: Colors.white54,
+                          size: 48,
+                        ),
+                      ),
+                    );
+                  },
+                  cacheWidth: 800, // Optimisation mémoire
+                ),
               ),
             );
           }
