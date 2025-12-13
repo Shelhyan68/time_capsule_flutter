@@ -18,7 +18,7 @@ void main() async {
 }
 
 class TimeCapsuleApp extends StatelessWidget {
-  const TimeCapsuleApp({Key? key}) : super(key: key);
+  const TimeCapsuleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

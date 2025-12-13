@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../data/auth_repository.dart';
+import 'reset_password_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -66,6 +67,45 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _isLoading = true);
 
     try {
+      // Check if email is already in use
+      final methods = await _authRepository.fetchSignInMethodsForEmail(email);
+      if (methods.isNotEmpty) {
+        // Email already registered
+        if (!mounted) return;
+        _showError('Cet email est déjà utilisé.');
+        // Optionally, navigate to login or reset password
+        await Future.delayed(const Duration(seconds: 1));
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Email déjà utilisé'),
+            content: const Text(
+              'Souhaitez-vous vous connecter ou réinitialiser votre mot de passe ?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Go back to previous (login) page
+                },
+                child: const Text('Se connecter'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ResetPasswordPage(),
+                    ),
+                  );
+                },
+                child: const Text('Réinitialiser le mot de passe'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
       await _authRepository.register(email, password);
       if (mounted) Navigator.pop(context);
     } catch (e) {

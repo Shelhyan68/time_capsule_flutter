@@ -15,6 +15,7 @@ class EmailService {
     required String capsuleTitle,
     required DateTime sendDate,
     required String senderName,
+    required String letter,
   }) async {
     try {
       // Normaliser les dates pour la comparaison (ignorer l'heure)
@@ -35,6 +36,7 @@ class EmailService {
         'sendDate': Timestamp.fromDate(shouldSendNow ? now : sendDate),
         'status': shouldSendNow ? 'immediate' : 'pending',
         'createdAt': FieldValue.serverTimestamp(),
+        'letter': letter,
       });
     } catch (e) {
       throw Exception('Erreur lors de la planification de l\'email: $e');
@@ -42,97 +44,213 @@ class EmailService {
   }
 
   /// Génère le contenu HTML du mail avec le style de l'application
+  /// Optimisé pour SendGrid et Gmail iOS dark mode
   static String generateEmailHtml({
     required String recipientName,
     required String senderName,
     required String capsuleTitle,
     required String openDate,
     required String capsuleUrl,
+    required String letter,
   }) {
     return '''
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light" />
   <title>Capsule Temporelle</title>
+  <style type="text/css">
+    /* SendGrid: Désactiver le dark mode automatique */
+    :root {
+      color-scheme: light only;
+      supported-color-schemes: light;
+    }
+    
+    /* Force le mode clair */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: light !important;
+      }
+      
+      /* Force toutes les couleurs */
+      * {
+        color-scheme: light !important;
+      }
+      
+      body {
+        background-color: #f4f6fb !important;
+        color: #1f2937 !important;
+      }
+      
+      .bg-body { background-color: #f4f6fb !important; }
+      .bg-white { background-color: #ffffff !important; }
+      .bg-gray { background-color: #f9fafb !important; }
+      .bg-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+      
+      .text-dark { color: #1f2937 !important; }
+      .text-gray { color: #374151 !important; }
+      .text-muted { color: #6b7280 !important; }
+      .text-white { color: #ffffff !important; }
+      .text-light { color: #eef0ff !important; }
+      
+      .border-gray { border-color: #e5e7eb !important; }
+    }
+    
+    /* Empêcher Gmail et SendGrid d'appliquer leurs styles */
+    [data-ogsc] * {
+      color-scheme: light !important;
+    }
+    
+    [data-ogsc] .bg-body,
+    [data-ogsc] body {
+      background-color: #f4f6fb !important;
+    }
+    
+    [data-ogsc] .bg-white {
+      background-color: #ffffff !important;
+    }
+    
+    [data-ogsc] .text-dark {
+      color: #1f2937 !important;
+    }
+    
+    [data-ogsc] .text-gray {
+      color: #374151 !important;
+    }
+    
+    /* Support des anciens clients email */
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      -webkit-text-size-adjust: 100% !important;
+      -ms-text-size-adjust: 100% !important;
+    }
+    
+    table {
+      border-collapse: collapse !important;
+      mso-table-lspace: 0pt !important;
+      mso-table-rspace: 0pt !important;
+    }
+    
+    img {
+      border: 0 !important;
+      outline: none !important;
+      -ms-interpolation-mode: bicubic !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0A0E1A 0%, #1a1f3a 100%);">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #0A0E1A 0%, #1a1f3a 100%); padding: 40px 20px;">
+
+<body class="bg-body" bgcolor="#f4f6fb" style="margin: 0; padding: 0; background-color: #f4f6fb; font-family: Arial, Helvetica, sans-serif; color-scheme: light;">
+  
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-body" bgcolor="#f4f6fb" style="background-color: #f4f6fb; color-scheme: light;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.12); overflow: hidden;">
+      <td align="center" valign="top" style="padding: 32px 16px;">
+        
+        <!-- Container 600px -->
+        <table border="0" cellpadding="0" cellspacing="0" width="600" class="bg-white" bgcolor="#ffffff" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden;">
           
-          <!-- Header with stars -->
+          <!-- Header avec gradient -->
           <tr>
-            <td style="padding: 40px 40px 20px; text-align: center; position: relative;">
-              <div style="font-size: 48px; margin-bottom: 10px;">⏳</div>
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
-                Capsule Temporelle
-              </h1>
-              <p style="color: rgba(255, 255, 255, 0.7); margin: 10px 0 0; font-size: 16px;">
-                Le temps s'écoule, tes souvenirs restent
-              </p>
+            <td class="bg-gradient" align="center" bgcolor="#667eea" style="padding: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <div style="font-size: 42px; line-height: 42px; margin-bottom: 12px;">⏳</div>
+                    <h1 class="text-white" style="margin: 0; padding: 0; color: #ffffff; font-size: 26px; font-weight: bold; font-family: Arial, Helvetica, sans-serif;">
+                      Capsule Temporelle
+                    </h1>
+                    <p class="text-light" style="margin: 8px 0 0; padding: 0; color: #eef0ff; font-size: 15px; font-family: Arial, Helvetica, sans-serif;">
+                      Le temps s'écoule, tes souvenirs restent
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-
+          
           <!-- Greeting -->
           <tr>
-            <td style="padding: 30px 40px;">
-              <p style="color: #ffffff; font-size: 18px; margin: 0 0 20px;">
-                Bonjour <strong>$recipientName</strong> 👋
-              </p>
-              <p style="color: rgba(255, 255, 255, 0.85); font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                <strong>$senderName</strong> a créé une capsule temporelle spécialement pour toi !
-              </p>
+            <td class="bg-white" bgcolor="#ffffff" style="padding: 32px; background-color: #ffffff;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td>
+                    <p class="text-dark" style="margin: 0 0 16px; padding: 0; font-size: 17px; color: #1f2937; font-family: Arial, Helvetica, sans-serif;">
+                      Bonjour <strong style="color: #1f2937;">$recipientName</strong>,
+                    </p>
+                    <p class="text-gray" style="margin: 0; padding: 0; font-size: 16px; line-height: 24px; color: #374151; font-family: Arial, Helvetica, sans-serif;">
+                      <strong style="color: #374151;">$senderName</strong> a créé une capsule temporelle pour toi. Elle contient un message et des souvenirs qu'il ou elle a souhaité te transmettre.
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-
+          
           <!-- Capsule Card -->
           <tr>
-            <td style="padding: 0 40px 30px;">
-              <div style="background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                  <span style="font-size: 32px; margin-right: 12px;">🔓</span>
-                  <div>
-                    <h2 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: bold;">
-                      $capsuleTitle
-                    </h2>
-                    <p style="color: rgba(255, 255, 255, 0.6); margin: 4px 0 0; font-size: 14px;">
-                      📅 Ouverture : $openDate
-                    </p>
-                  </div>
-                </div>
-                <p style="color: rgba(255, 255, 255, 0.7); margin: 16px 0 0; font-size: 14px; line-height: 1.5;">
-                  Cette capsule contient des souvenirs, des photos et un message personnel que $senderName a préparé pour toi. Elle est maintenant prête à être découverte ! ✨
-                </p>
-              </div>
+            <td class="bg-white" bgcolor="#ffffff" style="padding: 0 32px 32px; background-color: #ffffff;">
+              
+              <!-- Inner card table -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-gray border-gray" bgcolor="#f9fafb" style="background-color: #f9fafb; border-radius: 16px; border: 1px solid #e5e7eb;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td>
+                          <!-- Title -->
+                          <h2 class="text-dark" style="margin: 0 0 6px; padding: 0; font-size: 20px; color: #111827; font-weight: bold; font-family: Arial, Helvetica, sans-serif;">
+                            🕰️ $capsuleTitle
+                          </h2>
+                          
+                          <!-- Date -->
+                          <p class="text-muted" style="margin: 0 0 16px; padding: 0; font-size: 14px; color: #6b7280; font-family: Arial, Helvetica, sans-serif;">
+                            Ouverture prévue le $openDate
+                          </p>
+                          
+                          <!-- Content box -->
+                          <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-white border-gray" bgcolor="#ffffff" style="background-color: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb;">
+                            <tr>
+                              <td style="padding: 20px;">
+                                <p class="text-gray" style="margin: 0; padding: 0; font-size: 15px; line-height: 25px; color: #374151; font-family: Arial, Helvetica, sans-serif; white-space: pre-line;">$letter</p>
+                              </td>
+                            </tr>
+                          </table>
+                          
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
             </td>
           </tr>
-
-          <!-- CTA Button -->
-          <tr>
-            <td style="padding: 0 40px 40px; text-align: center;">
-              <a href="$capsuleUrl" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                🚀 Ouvrir ma capsule
-              </a>
-            </td>
-          </tr>
-
+          
           <!-- Footer -->
           <tr>
-            <td style="padding: 30px 40px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
-              <p style="color: rgba(255, 255, 255, 0.5); margin: 0; font-size: 13px; line-height: 1.6;">
-                Cette capsule a été créée avec 💜 sur TimeCapsule<br>
-                Un moyen unique de préserver et partager tes souvenirs à travers le temps
-              </p>
+            <td class="bg-gray" align="center" bgcolor="#f9fafb" style="padding: 24px 32px; background-color: #f9fafb;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <p class="text-muted" style="margin: 0; padding: 0; font-size: 13px; color: #6b7280; line-height: 20px; font-family: Arial, Helvetica, sans-serif;">
+                      Capsule créée avec ❤️ sur <strong style="color: #6b7280;">TimeCapsule</strong><br/>
+                      Un moyen unique de préserver et partager tes souvenirs
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-
+          
         </table>
+        
       </td>
     </tr>
   </table>
+  
 </body>
 </html>
 ''';

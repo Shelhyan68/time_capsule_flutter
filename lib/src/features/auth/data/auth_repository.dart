@@ -4,6 +4,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthRepository {
+  // Check if email is already registered
+  Future<List<String>> fetchSignInMethodsForEmail(String email) {
+    return _auth.fetchSignInMethodsForEmail(email);
+  }
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Email / Password

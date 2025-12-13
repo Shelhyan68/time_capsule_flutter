@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/capsule_model.dart';
+import '../../domain/models/capsule_model.dart';
 
 class CapsuleCard extends StatelessWidget {
   final CapsuleModel capsule;
@@ -27,6 +27,6 @@ class CapsuleCard extends StatelessWidget {
 
 extension DateHelpers on DateTime {
   String toShortDateString() {
-    return "${this.day}/${this.month}/${this.year}";
+    return "${day}/${month}/${year}";
   }
 }

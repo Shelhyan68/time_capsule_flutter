@@ -128,6 +128,7 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
             capsuleTitle: _titleController.text,
             sendDate: _openDate!,
             senderName: senderName,
+            letter: _letterController.text,
           );
 
           // Déterminer si l'email part immédiatement ou plus tard

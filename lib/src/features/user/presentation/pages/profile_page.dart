@@ -104,11 +104,13 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            dialogBackgroundColor: const Color(0xFF1A1F2C),
             colorScheme: const ColorScheme.dark(
               primary: AppColors.capsuleUnlocked,
               onPrimary: Colors.white,
               surface: Color(0xFF1A1F2C),
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: const Color(0xFF1A1F2C),
             ),
           ),
           child: child!,
