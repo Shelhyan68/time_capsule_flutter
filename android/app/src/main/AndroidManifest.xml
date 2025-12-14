@@ -19,28 +19,24 @@
         <category android:name="android.intent.category.LAUNCHER"/>
     </intent-filter>
 
-    <!-- Intent filter pour web.app (App Links vérifié) -->
+    <!-- Intent filter pour web.app -->
     <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data
-            android:scheme="https"
-                android:host="timecapsule.firebaseapp.com or your custom domain"
-    android:pathPrefix="/__/auth/links" />
+        <data android:scheme="https" android:host="time-capsule-5ecb5.web.app" />
     </intent-filter>
 
-    <!-- Intent filter pour firebaseapp.com (Deep Links sans vérification) -->
+    <!-- Intent filter pour firebaseapp.com - tous les chemins auth -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data
-            android:scheme="https"
-            android:host="time-capsule-5ecb5.firebaseapp.com" />
+        <data android:scheme="https" android:host="time-capsule-5ecb5.firebaseapp.com" />
+        <data android:scheme="https" android:host="time-capsule-5ecb5.firebaseapp.com" android:pathPrefix="/__/auth" />
     </intent-filter>
 
-    <!-- Intent filter pour le schéma personnalisé (ouvre directement l'app) -->
+    <!-- Intent filter pour le schéma personnalisé -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />

@@ -51,7 +51,7 @@ class DashboardPage extends StatelessWidget {
               tooltip: 'Quitter le flux',
               onPressed: () async {
                 try {
-                  authRepository.logout();
+                  await authRepository.signOut();
                 } catch (e) {
                   ScaffoldMessenger.of(
                     context,

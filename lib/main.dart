@@ -1,19 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:app_links/app_links.dart';
+
+import 'firebase_options.dart';
+import 'src/app_router.dart';
 import 'src/features/auth/data/auth_repository.dart';
-import 'src/features/auth/data/magic_link_service.dart';
 import 'src/features/auth/presentation/pages/login_page.dart';
 import 'src/features/capsule/presentation/pages/dashboard_page.dart';
 import 'src/features/user/data/user_service.dart';
 import 'src/features/user/domain/models/user_profile.dart';
 import 'src/features/user/presentation/pages/profile_setup_page.dart';
-import 'src/app_router.dart';
-import 'firebase_options.dart';
-import 'package:app_links/app_links.dart';
-import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +20,7 @@ void main() async {
   runApp(const TimeCapsuleApp());
 }
 
+/// Application principale Time Capsule
 class TimeCapsuleApp extends StatefulWidget {
   const TimeCapsuleApp({super.key});
 
@@ -28,71 +28,96 @@ class TimeCapsuleApp extends StatefulWidget {
   State<TimeCapsuleApp> createState() => _TimeCapsuleAppState();
 }
 
-class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
-  late AppLinks _appLinks;
+class _TimeCapsuleAppState extends State<TimeCapsuleApp>
+    with WidgetsBindingObserver {
+  // Services
+  final _authRepository = AuthRepository();
+  late final UserService _userService;
+
+  // Deep Links
+  late final AppLinks _appLinks;
   StreamSubscription? _linkSubscription;
-  final _magicLinkService = MagicLinkService();
+
+  // State
   final _navigatorKey = GlobalKey<NavigatorState>();
   bool _isProcessingLink = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _userService = UserService(
+      firestore: FirebaseFirestore.instance,
+      auth: FirebaseAuth.instance,
+    );
     _initDeepLinks();
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Rafraîchit l'UI quand l'app revient au premier plan
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isProcessingLink) {
+      debugPrint('🔄 App resumed - refreshing UI');
+      setState(() {});
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // DEEP LINKS (Magic Link)
+  // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
 
-    // Gérer le lien initial (app fermée -> ouverte via lien)
+    // Lien initial (app fermée -> ouverte via lien)
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
-        debugPrint('Initial link detected: $initialUri');
-        _handleMagicLink(initialUri.toString());
+        debugPrint('📩 Initial link: $initialUri');
+        _handleDeepLink(initialUri.toString());
       }
     } catch (e) {
-      debugPrint('Erreur initial link: $e');
+      debugPrint('❌ Error getting initial link: $e');
     }
 
-    // Gérer les liens entrants (app déjà ouverte)
-    _linkSubscription = _appLinks.uriLinkStream.listen(
-      (Uri? uri) {
-        if (uri != null) {
-          debugPrint('Link stream detected: $uri');
-          _handleMagicLink(uri.toString());
-        }
-      },
-      onError: (err) {
-        debugPrint('Erreur link stream: $err');
-      },
-    );
+    // Liens entrants (app déjà ouverte)
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        debugPrint('📩 Link stream: $uri');
+        _handleDeepLink(uri.toString());
+      }
+    }, onError: (err) => debugPrint('❌ Link stream error: $err'));
   }
 
-  Future<void> _handleMagicLink(String link) async {
-    if (_isProcessingLink) return;
+  Future<void> _handleDeepLink(String link) async {
+    if (_isProcessingLink) {
+      debugPrint('⚠️ Already processing a link, skipping');
+      return;
+    }
 
-    debugPrint('🔗 [DeepLink] Lien reçu: $link');
+    debugPrint('🔗 Processing deep link: $link');
 
+    // Extraire le lien Firebase si c'est un custom scheme
     String actualLink = link;
-
-    // Si c'est un custom scheme, extraire le lien Firebase du paramètre
     if (link.startsWith('timecapsule://')) {
-      debugPrint('📱 [DeepLink] Custom scheme détecté');
       try {
         final uri = Uri.parse(link);
         final encodedLink = uri.queryParameters['link'];
         if (encodedLink != null) {
           actualLink = Uri.decodeComponent(encodedLink);
-          debugPrint('🔗 [DeepLink] Lien Firebase extrait: $actualLink');
+          debugPrint('🔗 Extracted Firebase link: $actualLink');
         } else {
-          debugPrint(
-            '⚠️ [DeepLink] Paramètre "link" manquant dans le custom scheme',
-          );
           return;
         }
       } catch (e) {
-        debugPrint('❌ [DeepLink] Erreur parsing custom scheme: $e');
+        debugPrint('❌ Error parsing custom scheme: $e');
         return;
       }
     }
@@ -100,116 +125,130 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
     // Vérifier si c'est un lien Firebase Auth
     if (!actualLink.contains('firebaseapp.com') &&
         !actualLink.contains('web.app')) {
-      debugPrint('⚠️ [DeepLink] Ce n\'est pas un lien Firebase, ignoré');
+      debugPrint('⚠️ Not a Firebase link, ignoring');
       return;
     }
 
-    setState(() => _isProcessingLink = true);
+    _isProcessingLink = true;
+    if (mounted) setState(() {});
 
     try {
-      debugPrint('🔄 [DeepLink] Tentative de connexion avec le magic link...');
-      final userCredential = await _magicLinkService.signInWithMagicLink(
+      final userCredential = await _authRepository.signInWithMagicLink(
         actualLink,
       );
-
       if (userCredential != null) {
         debugPrint(
-          '✅ [DeepLink] Connexion réussie: ${userCredential.user?.email}',
+          '✅ Magic link sign-in successful: ${userCredential.user?.email}',
         );
-
-        // Faire un retour arrière automatique pour fermer la page du navigateur
-        // et revenir à l'app (qui affichera le dashboard ou profile)
-        await Future.delayed(const Duration(milliseconds: 200));
-        SystemNavigator.pop();
       }
     } catch (e) {
-      debugPrint('❌ [DeepLink] Erreur lors de la connexion: $e');
-
-      // Afficher un message d'erreur
-      if (mounted && _navigatorKey.currentContext != null) {
-        ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erreur de connexion: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      debugPrint('❌ Magic link sign-in error: $e');
+      _showError('Erreur de connexion: ${e.toString()}');
     } finally {
-      if (mounted) {
-        setState(() => _isProcessingLink = false);
-      }
+      _isProcessingLink = false;
+      if (mounted) setState(() {});
     }
   }
 
-  @override
-  void dispose() {
-    _linkSubscription?.cancel();
-    super.dispose();
+  void _showError(String message) {
+    if (!mounted || _navigatorKey.currentContext == null) return;
+    ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // UI
+  // ─────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final authRepository = AuthRepository();
-    final userService = UserService(
-      firestore: FirebaseFirestore.instance,
-      auth: FirebaseAuth.instance,
-    );
-
     return MaterialApp(
       navigatorKey: _navigatorKey,
-      title: 'TimeCapsule',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'Time Capsule',
+      debugShowCheckedModeBanner: false,
+      theme: _buildTheme(),
       onGenerateRoute: AppRouter.generateRoute,
-      home: StreamBuilder<User?>(
-        stream: authRepository.authStateChanges(),
-        builder: (context, snapshot) {
-          // Afficher un loader pendant le traitement du magic link
-          if (_isProcessingLink) {
-            return const Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Connexion en cours...'),
-                  ],
-                ),
-              ),
-            );
-          }
+      home: _buildHome(),
+    );
+  }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+  ThemeData _buildTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorSchemeSeed: Colors.blue,
+      scaffoldBackgroundColor: const Color(0xFF0B0F1A),
+    );
+  }
 
-          if (snapshot.hasData) {
-            // Utilisateur connecté, vérifier s'il a un profil
-            return StreamBuilder<UserProfile?>(
-              stream: userService.getCurrentUserProfileStream(),
-              builder: (context, profileSnapshot) {
-                if (profileSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
+  Widget _buildHome() {
+    // Loading pendant le traitement du magic link
+    if (_isProcessingLink) {
+      return const _LoadingScreen(message: 'Connexion en cours...');
+    }
 
-                final hasProfile = profileSnapshot.data != null;
-                if (!hasProfile) {
-                  return const ProfileSetupPage();
-                }
+    return StreamBuilder<User?>(
+      stream: _authRepository.authStateChanges(),
+      builder: (context, authSnapshot) {
+        debugPrint(
+          '🔄 Auth state: ${authSnapshot.data?.email ?? "non connecté"}',
+        );
 
-                return const DashboardPage();
-              },
-            );
-          }
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
+          return const _LoadingScreen();
+        }
 
+        // Non connecté -> Login
+        if (!authSnapshot.hasData) {
           return const LoginPage();
-        },
+        }
+
+        // Connecté -> Vérifier profil
+        return StreamBuilder<UserProfile?>(
+          stream: _userService.getCurrentUserProfileStream(),
+          builder: (context, profileSnapshot) {
+            if (profileSnapshot.connectionState == ConnectionState.waiting) {
+              return const _LoadingScreen();
+            }
+
+            // Pas de profil -> Setup
+            if (profileSnapshot.data == null) {
+              return const ProfileSetupPage();
+            }
+
+            // Profil OK -> Dashboard
+            return const DashboardPage();
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Écran de chargement réutilisable
+class _LoadingScreen extends StatelessWidget {
+  final String message;
+
+  const _LoadingScreen({this.message = 'Chargement...'});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B0F1A),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(message, style: const TextStyle(color: Colors.white70)),
+          ],
+        ),
       ),
     );
   }

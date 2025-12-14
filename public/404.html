@@ -127,8 +127,29 @@
   </div>
 
   <script>
-    console.log('Page index chargée');
-    console.log('URL:', window.location.href);
+    // Essayer d'ouvrir l'app automatiquement
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const oobCode = urlParams.get('oobCode');
+    const continueUrl = urlParams.get('continueUrl');
+    
+    // Log pour debug
+    console.log('Page 404/Auth handler');
+    console.log('Mode:', mode);
+    console.log('Continue URL:', continueUrl);
+    
+    // Si on a un continueUrl, on peut rediriger
+    if (continueUrl) {
+      // Ajouter les paramètres au continueUrl
+      const redirectUrl = new URL(continueUrl);
+      if (oobCode) redirectUrl.searchParams.set('oobCode', oobCode);
+      if (mode) redirectUrl.searchParams.set('mode', mode);
+      
+      // Rediriger après un court délai pour montrer le message de succès
+      setTimeout(() => {
+        window.location.href = redirectUrl.toString();
+      }, 1500);
+    }
   </script>
 </body>
 </html>

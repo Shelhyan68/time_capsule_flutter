@@ -57,6 +57,14 @@
     ],
     "rewrites": [
       {
+        "source": "/action",
+        "destination": "/action/index.html"
+      },
+      {
+        "source": "/action/**",
+        "destination": "/action/index.html"
+      },
+      {
         "source": "/auth",
         "destination": "/auth/index.html"
       },
@@ -66,12 +74,15 @@
       },
       {
         "source": "/__/auth/**",
-        "destination": "/auth/index.html"
+        "destination": "/action/index.html"
       },
       {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "firestore": {
+    "indexes": "firestore.indexes.json"
   }
 }

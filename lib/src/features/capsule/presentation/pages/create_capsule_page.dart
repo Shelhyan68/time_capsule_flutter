@@ -208,7 +208,7 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
               tooltip: 'Quitter le flux',
               onPressed: () async {
                 try {
-                  authRepository.logout();
+                  await authRepository.signOut();
                 } catch (e) {
                   ScaffoldMessenger.of(
                     context,

@@ -21,19 +21,12 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   final _imagePicker = ImagePicker();
 
   File? _newProfileImage;
   DateTime? _birthDate;
   bool _isLoading = false;
   bool _isEditing = false;
-  bool _isChangingPassword = false;
-  bool _obscureCurrentPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
   UserProfile? _currentProfile;
 
   late final UserService _userService;
@@ -52,9 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -166,76 +156,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
       _showMessage('Profil mis à jour');
       await _loadProfile();
-    } catch (e) {
-      _showMessage('Erreur: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _changePassword() async {
-    if (_currentPasswordController.text.isEmpty ||
-        _newPasswordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      _showMessage('Veuillez remplir tous les champs');
-      return;
-    }
-
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      _showMessage('Les mots de passe ne correspondent pas');
-      return;
-    }
-
-    if (_newPasswordController.text.length < 6) {
-      _showMessage('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null || user.email == null) {
-        throw Exception('Utilisateur non connecté');
-      }
-
-      // Réauthentifier l'utilisateur avec l'ancien mot de passe
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: _currentPasswordController.text,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-
-      // Changer le mot de passe
-      await user.updatePassword(_newPasswordController.text);
-
-      if (!mounted) return;
-
-      // Réinitialiser les champs
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-      _confirmPasswordController.clear();
-
-      setState(() => _isChangingPassword = false);
-
-      _showMessage('Mot de passe modifié avec succès');
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'wrong-password':
-          message = 'Mot de passe actuel incorrect';
-          break;
-        case 'weak-password':
-          message = 'Le mot de passe est trop faible';
-          break;
-        case 'requires-recent-login':
-          message = 'Veuillez vous reconnecter et réessayer';
-          break;
-        default:
-          message = 'Erreur: ${e.message}';
-      }
-      _showMessage(message);
     } catch (e) {
       _showMessage('Erreur: $e');
     } finally {
@@ -597,232 +517,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           const SizedBox(height: AppSizes.paddingMedium),
-
-                          // Section changement de mot de passe
-                          if (_isEditing) ...[
-                            const Divider(color: AppColors.glassSurface),
-                            const SizedBox(height: AppSizes.paddingMedium),
-
-                            // Toggle changement de mot de passe
-                            InkWell(
-                              onTap: () => setState(
-                                () =>
-                                    _isChangingPassword = !_isChangingPassword,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      'Changer le mot de passe',
-                                      style: TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Icon(
-                                      _isChangingPassword
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            if (_isChangingPassword) ...[
-                              const SizedBox(height: AppSizes.paddingMedium),
-
-                              // Mot de passe actuel
-                              TextFormField(
-                                controller: _currentPasswordController,
-                                obscureText: _obscureCurrentPassword,
-                                enabled: !_isLoading,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: 'Mot de passe actuel',
-                                  labelStyle: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  prefixIcon: const Icon(
-                                    Icons.lock_outline,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscureCurrentPassword
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    onPressed: () => setState(
-                                      () => _obscureCurrentPassword =
-                                          !_obscureCurrentPassword,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.glassSurface.withOpacity(
-                                        0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.capsuleUnlocked,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSizes.paddingMedium),
-
-                              // Nouveau mot de passe
-                              TextFormField(
-                                controller: _newPasswordController,
-                                obscureText: _obscureNewPassword,
-                                enabled: !_isLoading,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: 'Nouveau mot de passe',
-                                  labelStyle: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  prefixIcon: const Icon(
-                                    Icons.lock,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscureNewPassword
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    onPressed: () => setState(
-                                      () => _obscureNewPassword =
-                                          !_obscureNewPassword,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.glassSurface.withOpacity(
-                                        0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.capsuleUnlocked,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSizes.paddingMedium),
-
-                              // Confirmation mot de passe
-                              TextFormField(
-                                controller: _confirmPasswordController,
-                                obscureText: _obscureConfirmPassword,
-                                enabled: !_isLoading,
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: 'Confirmer le mot de passe',
-                                  labelStyle: const TextStyle(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  prefixIcon: const Icon(
-                                    Icons.lock_clock,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscureConfirmPassword
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    onPressed: () => setState(
-                                      () => _obscureConfirmPassword =
-                                          !_obscureConfirmPassword,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.glassSurface.withOpacity(
-                                        0.3,
-                                      ),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.radiusMedium,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.capsuleUnlocked,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSizes.paddingMedium),
-
-                              // Bouton changer mot de passe
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: _isLoading
-                                      ? null
-                                      : _changePassword,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.warning,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        AppSizes.radiusMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Changer le mot de passe',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-
-                            const SizedBox(height: AppSizes.paddingMedium),
-                            const Divider(color: AppColors.glassSurface),
-                          ],
 
                           const SizedBox(height: 32),
 
