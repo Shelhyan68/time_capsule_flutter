@@ -8,6 +8,7 @@ class CapsuleModel {
   final DateTime openDate;
   final String? recipientName;
   final String? recipientEmail;
+  final String userId;
 
   CapsuleModel({
     required this.id,
@@ -17,6 +18,7 @@ class CapsuleModel {
     required this.openDate,
     this.recipientName,
     this.recipientEmail,
+    required this.userId,
   });
 
   factory CapsuleModel.fromDoc(DocumentSnapshot doc) {
@@ -29,6 +31,7 @@ class CapsuleModel {
       letter: data['letter'],
       recipientName: data['recipientName'],
       recipientEmail: data['recipientEmail'],
+      userId: data['userId'] ?? '',
     );
   }
 
@@ -39,6 +42,7 @@ class CapsuleModel {
     'letter': letter,
     'recipientName': recipientName,
     'recipientEmail': recipientEmail,
+    'userId': userId,
   };
 
   Map<String, dynamic> toFirestore() => toMap();

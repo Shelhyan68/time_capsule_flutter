@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../data/auth_repository.dart';
-import 'register_page.dart';
-import 'reset_password_page.dart';
+import '../../data/magic_link_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,34 +12,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _authRepository = AuthRepository();
-
+  final _magicLinkService = MagicLinkService();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _login() async {
-    setState(() => _isLoading = true);
-
-    try {
-      await _authRepository.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
   }
 
   @override
@@ -69,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ─── Titre ─────────────────────────────
                       Text(
                         'Capsule Temporelle',
                         style: theme.textTheme.headlineSmall?.copyWith(
@@ -77,17 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Entre dans le flux du temps',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // ─── Email ─────────────────────────────
+                      const SizedBox(height: 24),
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -95,22 +63,45 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: _inputDecoration('Email'),
                       ),
                       const SizedBox(height: 16),
-
-                      // ─── Mot de passe ──────────────────────
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration('Mot de passe'),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // ─── Bouton principal ──────────────────
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: _isLoading ? null : _login,
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  setState(() => _isLoading = true);
+                                  try {
+                                    await _magicLinkService.sendMagicLink(
+                                      _emailController.text.trim(),
+                                    );
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Lien magique envoyé ! Vérifiez votre email.',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Erreur: [${e.toString()}',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    if (mounted)
+                                      setState(() => _isLoading = false);
+                                  }
+                                },
                           child: _isLoading
                               ? const SizedBox(
                                   height: 20,
@@ -120,58 +111,23 @@ class _LoginPageState extends State<LoginPage> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text('Ouvrir mes capsules'),
+                              : const Text('Recevoir un lien magique'),
                         ),
                       ),
-
-                      const SizedBox(height: 16),
-
-                      // ─── Liens ─────────────────────────────
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ResetPasswordPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('Mot de passe oublié ?'),
-                      ),
-
                       const Divider(color: Colors.white24),
-
-                      // ─── OAuth ─────────────────────────────
                       OutlinedButton.icon(
                         icon: const Icon(Icons.login),
                         label: const Text('Google'),
                         onPressed: () => _authRepository.signInWithGoogle(),
                       ),
-
                       if (Theme.of(context).platform == TargetPlatform.iOS)
                         const SizedBox(height: 8),
-
                       if (Theme.of(context).platform == TargetPlatform.iOS)
                         OutlinedButton.icon(
                           icon: const Icon(Icons.apple),
                           label: const Text('Apple'),
                           onPressed: () => _authRepository.signInWithApple(),
                         ),
-
-                      const SizedBox(height: 16),
-
-                      // ─── Création de compte ─────────────────
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RegisterPage(),
-                            ),
-                          );
-                        },
-                        child: const Text('Créer un compte'),
-                      ),
                     ],
                   ),
                 ),

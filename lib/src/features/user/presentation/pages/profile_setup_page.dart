@@ -153,6 +153,19 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
     return SpaceBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout, color: AppColors.textSecondary),
+              tooltip: 'Déconnexion',
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+              },
+            ),
+          ],
+        ),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../domain/models/capsule_model.dart';
 
 class CapsuleService {
@@ -11,8 +12,13 @@ class CapsuleService {
   /// Triées par date d'ouverture croissante
   Stream<List<CapsuleModel>> getCapsules() {
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        return const Stream.empty();
+      }
       return _firestore
           .collection('capsules')
+          .where('userId', isEqualTo: user.uid)
           .orderBy('openDate')
           .snapshots()
           .map(
@@ -36,9 +42,11 @@ class CapsuleService {
   /// Crée une nouvelle capsule
   Future<String> createCapsule(CapsuleModel capsule) async {
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('Utilisateur non connecté');
       final docRef = await _firestore
           .collection('capsules')
-          .add(capsule.toFirestore());
+          .add(capsule.copyWith(userId: user.uid).toMap());
       return docRef.id;
     } catch (e) {
       throw Exception('Erreur lors de la création de la capsule: $e');
