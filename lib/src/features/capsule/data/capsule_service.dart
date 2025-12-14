@@ -46,7 +46,7 @@ class CapsuleService {
       if (user == null) throw Exception('Utilisateur non connecté');
       final docRef = await _firestore
           .collection('capsules')
-          .add(capsule.copyWith(userId: user.uid).toMap());
+          .add(capsule.toMap());
       return docRef.id;
     } catch (e) {
       throw Exception('Erreur lors de la création de la capsule: $e');

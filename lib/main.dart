@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +29,7 @@ class TimeCapsuleApp extends StatefulWidget {
 }
 
 class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
+  late AppLinks _appLinks;
   StreamSubscription? _linkSubscription;
   final _magicLinkService = MagicLinkService();
   final _navigatorKey = GlobalKey<NavigatorState>();
@@ -40,30 +42,29 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
   }
 
   Future<void> _initDeepLinks() async {
-    final appLinks = AppLinks();
+    _appLinks = AppLinks();
+
     // Gérer le lien initial (app fermée -> ouverte via lien)
     try {
-      final uri = await appLinks.getInitialLink();
-      final initialLink = uri?.toString();
-      if (initialLink != null) {
-        debugPrint('Initial app link detected: $initialLink');
-        _handleMagicLink(initialLink);
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        debugPrint('Initial link detected: $initialUri');
+        _handleMagicLink(initialUri.toString());
       }
     } catch (e) {
-      debugPrint('Erreur initial app link: $e');
+      debugPrint('Erreur initial link: $e');
     }
 
     // Gérer les liens entrants (app déjà ouverte)
-    _linkSubscription = appLinks.uriLinkStream.listen(
+    _linkSubscription = _appLinks.uriLinkStream.listen(
       (Uri? uri) {
-        final link = uri?.toString();
-        if (link != null) {
-          debugPrint('App link stream detected: $link');
-          _handleMagicLink(link);
+        if (uri != null) {
+          debugPrint('Link stream detected: $uri');
+          _handleMagicLink(uri.toString());
         }
       },
       onError: (err) {
-        debugPrint('Erreur app link stream: $err');
+        debugPrint('Erreur link stream: $err');
       },
     );
   }
@@ -71,47 +72,66 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
   Future<void> _handleMagicLink(String link) async {
     if (_isProcessingLink) return;
 
-    debugPrint('[MagicLink] _handleMagicLink called with link: $link');
+    debugPrint('🔗 [DeepLink] Lien reçu: $link');
+
+    String actualLink = link;
+
+    // Si c'est un custom scheme, extraire le lien Firebase du paramètre
+    if (link.startsWith('timecapsule://')) {
+      debugPrint('📱 [DeepLink] Custom scheme détecté');
+      try {
+        final uri = Uri.parse(link);
+        final encodedLink = uri.queryParameters['link'];
+        if (encodedLink != null) {
+          actualLink = Uri.decodeComponent(encodedLink);
+          debugPrint('🔗 [DeepLink] Lien Firebase extrait: $actualLink');
+        } else {
+          debugPrint(
+            '⚠️ [DeepLink] Paramètre "link" manquant dans le custom scheme',
+          );
+          return;
+        }
+      } catch (e) {
+        debugPrint('❌ [DeepLink] Erreur parsing custom scheme: $e');
+        return;
+      }
+    }
+
+    // Vérifier si c'est un lien Firebase Auth
+    if (!actualLink.contains('firebaseapp.com') &&
+        !actualLink.contains('web.app')) {
+      debugPrint('⚠️ [DeepLink] Ce n\'est pas un lien Firebase, ignoré');
+      return;
+    }
+
     setState(() => _isProcessingLink = true);
 
     try {
-      final userCredential = await _magicLinkService.signInWithMagicLink(link);
+      debugPrint('🔄 [DeepLink] Tentative de connexion avec le magic link...');
+      final userCredential = await _magicLinkService.signInWithMagicLink(
+        actualLink,
+      );
 
       if (userCredential != null) {
         debugPrint(
-          '[MagicLink] Connexion réussie via Magic Link: ${userCredential.user?.email}',
+          '✅ [DeepLink] Connexion réussie: ${userCredential.user?.email}',
         );
 
-        // Afficher un message de succès
-        if (mounted && _navigatorKey.currentContext != null) {
-          ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Connexion réussie !'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      } else {
-        debugPrint('[MagicLink] userCredential est null');
+        // Faire un retour arrière automatique pour fermer la page du navigateur
+        // et revenir à l'app (qui affichera le dashboard ou profile)
+        await Future.delayed(const Duration(milliseconds: 200));
+        SystemNavigator.pop();
       }
     } catch (e) {
-      debugPrint('[MagicLink] Erreur lors de la connexion avec Magic Link: $e');
+      debugPrint('❌ [DeepLink] Erreur lors de la connexion: $e');
 
-      // Afficher un message d'erreur explicite
-      String message = '❌ Erreur de connexion.';
-      if (e.toString().contains('Email manquant')) {
-        message =
-            '❌ Impossible de retrouver votre email. Merci de cliquer sur le lien magique depuis le même appareil.';
-      } else if (e.toString().contains('Lien invalide')) {
-        message = '❌ Ce lien magique est invalide ou expiré.';
-      }
+      // Afficher un message d'erreur
       if (mounted && _navigatorKey.currentContext != null) {
         ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
           SnackBar(
-            content: Text(message),
+            content: Text('❌ Erreur de connexion: ${e.toString()}'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -144,6 +164,22 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp> {
       home: StreamBuilder<User?>(
         stream: authRepository.authStateChanges(),
         builder: (context, snapshot) {
+          // Afficher un loader pendant le traitement du magic link
+          if (_isProcessingLink) {
+            return const Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Connexion en cours...'),
+                  ],
+                ),
+              ),
+            );
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion...</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0B0F1A;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+    .loader {
+      text-align: center;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: #4CAF50;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    p { opacity: 0.7; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Ouverture de l'application...</p>
+  </div>
+
+  <script>
+    const currentUrl = window.location.href;
+    
+    // Intent Android qui ouvre l'app directement
+    const intentUrl = 'intent://time-capsule-5ecb5.web.app/auth' + window.location.search + 
+      '#Intent;' +
+      'scheme=https;' +
+      'package=com.example.time_capsule;' +
+      'end';
+    
+    // Ouvrir l'app via intent
+    window.location.replace(intentUrl);
+    
+    // Tenter de fermer cet onglet après un court délai
+    setTimeout(function() {
+      window.close();
+      // Si window.close() ne fonctionne pas (restrictions navigateur),
+      // naviguer vers une page vide
+      window.location.href = 'about:blank';
+    }, 1000);
+  </script>
+</body>
+</html>

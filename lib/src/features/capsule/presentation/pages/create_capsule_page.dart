@@ -87,6 +87,8 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
         mediaUrls.add(url);
       }
 
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('Utilisateur non connecté');
       final capsule = CapsuleModel(
         id: '', // Firestore va générer l'id
         title: _titleController.text,
@@ -100,11 +102,12 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
             _hasRecipient && _recipientEmailController.text.isNotEmpty
             ? _recipientEmailController.text
             : null,
+        userId: user.uid,
       );
 
       final docRef = await FirebaseFirestore.instance
           .collection('capsules')
-          .add(capsule.toFirestore());
+          .add(capsule.toMap());
 
       // Planifier l'email si un destinataire est défini
       if (_hasRecipient &&

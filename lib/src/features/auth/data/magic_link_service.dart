@@ -5,8 +5,9 @@ import 'package:flutter/foundation.dart';
 class MagicLinkService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // URL de votre app (modifiez selon votre projet)
-  static const String _continueUrl = 'https://time-capsule-5ecb5.web.app';
+  // URL de la page de redirection qui ouvrira l'app via custom scheme
+  static const String _continueUrl = 'https://time-capsule-5ecb5.web.app/auth';
+  static const String _androidPackageName = 'com.example.time_capsule';
 
   /// Envoie un magic link à l'email fourni
   Future<void> sendMagicLink(String email) async {
@@ -14,10 +15,10 @@ class MagicLinkService {
     final actionCodeSettings = ActionCodeSettings(
       url: _continueUrl,
       handleCodeInApp: true, // Important !
-      androidPackageName: 'com.example.votre_app', // Votre package Android
+      androidPackageName: _androidPackageName, // Votre package Android
       androidInstallApp: true,
       androidMinimumVersion: '21',
-      iOSBundleId: 'com.example.votreApp', // Votre bundle iOS
+      iOSBundleId: 'com.example.timeCapsule', // Votre bundle iOS
     );
 
     try {

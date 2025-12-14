@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "465196584764-pqostadol8psdlj403kgnorv198pb9be.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.time_capsule",
-            "certificate_hash": "01174291b67af4d220e8110db7bb5c9e8eca350e"
-          }
-        },
-        {
           "client_id": "465196584764-l75olv7841u0aen9ram2jqsf6u283700.apps.googleusercontent.com",
           "client_type": 3
         }

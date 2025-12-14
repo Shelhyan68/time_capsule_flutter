@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.time_capsule",
+      "sha256_cert_fingerprints": [
+        "AA:96:07:5A:83:BC:EA:6D:38:15:E8:B5:3C:77:18:3C:9E:B1:62:0A:D1:B2:2A:AA:F4:D5:62:4C:EA:B1:92:74"
+      ]
+    }
+  }
+]

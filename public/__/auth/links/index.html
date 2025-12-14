@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Time Capsule</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0B0F1A 0%, #1a1f2e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      background: rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+    p {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: #4CAF50;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .success {
+      color: #4CAF50;
+      font-size: 1.1rem;
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 0.85rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <h1>✨ Connexion en cours...</h1>
+    <p>Votre lien magique a été validé.<br>Retournez sur l'application Time Capsule pour continuer.</p>
+    <p class="success">Si l'application ne s'ouvre pas automatiquement, ouvrez-la manuellement.</p>
+    <p class="footer">&copy; 2025 Time Capsule</p>
+  </div>
+  <script>
+    // Tente d'ouvrir l'app via le deep link
+    const currentUrl = window.location.href;
+    const appUrl = currentUrl.replace('https://time-capsule-5ecb5.firebaseapp.com', 'https://time-capsule-5ecb5.web.app');
+    
+    // Essaie d'ouvrir l'app
+    setTimeout(() => {
+      window.location.href = appUrl;
+    }, 1500);
+  </script>
+</body>
+</html>
