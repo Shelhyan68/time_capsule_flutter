@@ -16,6 +16,7 @@ class EmailService {
     required DateTime sendDate,
     required String senderName,
     required String letter,
+    List<String>? mediaUrls,
   }) async {
     try {
       // Normaliser les dates pour la comparaison (ignorer l'heure)
@@ -37,6 +38,7 @@ class EmailService {
         'status': shouldSendNow ? 'immediate' : 'pending',
         'createdAt': FieldValue.serverTimestamp(),
         'letter': letter,
+        'mediaUrls': mediaUrls ?? [],
       });
     } catch (e) {
       throw Exception('Erreur lors de la planification de l\'email: $e');

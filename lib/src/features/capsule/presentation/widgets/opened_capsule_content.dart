@@ -96,20 +96,6 @@ class OpenedCapsuleContent extends StatelessWidget {
             );
           }
 
-          if (ext == 'mp4') {
-            return ListTile(
-              leading: const Icon(Icons.videocam, color: Colors.white70),
-              title: const Text(
-                'Vidéo',
-                style: TextStyle(color: Colors.white70),
-              ),
-              subtitle: const Text(
-                'Lecture bientôt disponible',
-                style: TextStyle(color: Colors.white54),
-              ),
-            );
-          }
-
           return ListTile(
             leading: const Icon(Icons.insert_drive_file, color: Colors.white70),
             title: Text(

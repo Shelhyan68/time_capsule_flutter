@@ -99,28 +99,61 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenHeight < 700;
+    final isVerySmallScreen = screenHeight < 600;
+
+    // Padding adaptatif selon la taille de l'écran
+    final horizontalPadding = screenWidth < 360 ? 16.0 : 24.0;
+    final verticalPadding = isSmallScreen ? 12.0 : 24.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFF0B0F1A),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: _buildCard(),
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: verticalPadding,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - (verticalPadding * 2),
+                ),
+                child: Center(
+                  child: _buildCard(
+                    isSmallScreen: isSmallScreen,
+                    isVerySmallScreen: isVerySmallScreen,
+                    screenWidth: screenWidth,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildCard() {
+  Widget _buildCard({
+    required bool isSmallScreen,
+    required bool isVerySmallScreen,
+    required double screenWidth,
+  }) {
+    final cardPadding = isSmallScreen ? 20.0 : 28.0;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           width: double.infinity,
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(28),
+          constraints: BoxConstraints(
+            maxWidth: screenWidth < 500 ? double.infinity : 400,
+          ),
+          padding: EdgeInsets.all(cardPadding),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(28),
@@ -129,12 +162,15 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(),
-              const SizedBox(height: 32),
+              _buildHeader(
+                isSmallScreen: isSmallScreen,
+                isVerySmallScreen: isVerySmallScreen,
+              ),
+              SizedBox(height: isSmallScreen ? 20 : 32),
               if (_magicLinkSent)
-                _buildMagicLinkSentMessage()
+                _buildMagicLinkSentMessage(isSmallScreen: isSmallScreen)
               else
-                _buildLoginForm(),
+                _buildLoginForm(isSmallScreen: isSmallScreen),
             ],
           ),
         ),
@@ -142,48 +178,63 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader({
+    required bool isSmallScreen,
+    required bool isVerySmallScreen,
+  }) {
+    final logoSize = isVerySmallScreen ? 56.0 : (isSmallScreen ? 64.0 : 80.0);
+    final iconSize = isVerySmallScreen ? 28.0 : (isSmallScreen ? 32.0 : 40.0);
+    final titleSize = isVerySmallScreen ? 20.0 : (isSmallScreen ? 22.0 : 26.0);
+    final subtitleSize = isVerySmallScreen ? 12.0 : 14.0;
+
     return Column(
       children: [
         // Logo
         Container(
-          width: 80,
-          height: 80,
+          width: logoSize,
+          height: logoSize,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [Colors.blue.shade400, Colors.purple.shade400],
             ),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.hourglass_empty,
-            size: 40,
+            size: iconSize,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 20),
-        const Text(
+        SizedBox(height: isSmallScreen ? 12 : 20),
+        Text(
           'Capsule Temporelle',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 26,
+            fontSize: titleSize,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: isSmallScreen ? 4 : 8),
         Text(
           'Préservez vos souvenirs dans le temps',
-          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: subtitleSize,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
-  Widget _buildMagicLinkSentMessage() {
+  Widget _buildMagicLinkSentMessage({required bool isSmallScreen}) {
+    final iconSize = isSmallScreen ? 40.0 : 48.0;
+    final padding = isSmallScreen ? 16.0 : 20.0;
+
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(padding),
           decoration: BoxDecoration(
             color: Colors.green.withOpacity(0.15),
             borderRadius: BorderRadius.circular(16),
@@ -191,26 +242,29 @@ class _LoginPageState extends State<LoginPage> {
           ),
           child: Column(
             children: [
-              const Icon(Icons.mark_email_read, size: 48, color: Colors.green),
-              const SizedBox(height: 16),
-              const Text(
+              Icon(Icons.mark_email_read, size: iconSize, color: Colors.green),
+              SizedBox(height: isSmallScreen ? 12 : 16),
+              Text(
                 'Vérifiez votre email !',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: isSmallScreen ? 16 : 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: isSmallScreen ? 6 : 8),
               Text(
                 'Un lien magique a été envoyé à\n${_emailController.text}',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: isSmallScreen ? 13 : 14,
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: isSmallScreen ? 16 : 20),
         TextButton(
           onPressed: () => setState(() => _magicLinkSent = false),
           child: const Text('← Utiliser un autre email'),
@@ -219,7 +273,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm({required bool isSmallScreen}) {
+    final buttonHeight = isSmallScreen ? 48.0 : 52.0;
+    final spacing = isSmallScreen ? 16.0 : 20.0;
+    final dividerSpacing = isSmallScreen ? 20.0 : 28.0;
+
     return Form(
       key: _formKey,
       child: Column(
@@ -228,7 +286,10 @@ class _LoginPageState extends State<LoginPage> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isSmallScreen ? 14 : 16,
+            ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Veuillez entrer votre email';
@@ -243,14 +304,15 @@ class _LoginPageState extends State<LoginPage> {
             decoration: _inputDecoration(
               label: 'Email',
               icon: Icons.email_outlined,
+              isSmallScreen: isSmallScreen,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: spacing),
 
           // Magic Link button
           SizedBox(
             width: double.infinity,
-            height: 52,
+            height: buttonHeight,
             child: FilledButton.icon(
               onPressed: _isLoading ? null : _sendMagicLink,
               icon: _isLoading
@@ -263,7 +325,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     )
                   : const Icon(Icons.auto_fix_high),
-              label: Text(_isLoading ? 'Envoi...' : 'Recevoir un lien magique'),
+              label: Text(
+                _isLoading ? 'Envoi...' : 'Recevoir un lien magique',
+                style: TextStyle(fontSize: isSmallScreen ? 14 : 15),
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.blue.shade600,
                 shape: RoundedRectangleBorder(
@@ -273,28 +338,28 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          const SizedBox(height: 28),
-          _buildDivider(),
-          const SizedBox(height: 28),
+          SizedBox(height: dividerSpacing),
+          _buildDivider(isSmallScreen: isSmallScreen),
+          SizedBox(height: dividerSpacing),
 
           // Social buttons
-          _buildSocialButtons(),
+          _buildSocialButtons(isSmallScreen: isSmallScreen),
         ],
       ),
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider({required bool isSmallScreen}) {
     return Row(
       children: [
         Expanded(child: Divider(color: Colors.white.withOpacity(0.2))),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 12 : 16),
           child: Text(
             'ou continuer avec',
             style: TextStyle(
               color: Colors.white.withOpacity(0.5),
-              fontSize: 12,
+              fontSize: isSmallScreen ? 11 : 12,
             ),
           ),
         ),
@@ -303,8 +368,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildSocialButtons() {
+  Widget _buildSocialButtons({required bool isSmallScreen}) {
     final isIOS = Platform.isIOS || Platform.isMacOS;
+    final buttonHeight = isSmallScreen ? 46.0 : 50.0;
 
     return Column(
       children: [
@@ -319,15 +385,19 @@ class _LoginPageState extends State<LoginPage> {
                 const Icon(Icons.g_mobiledata, color: Colors.white),
           ),
           label: 'Google',
+          height: buttonHeight,
+          isSmallScreen: isSmallScreen,
         ),
 
         // Apple (iOS/macOS only)
         if (isIOS) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: isSmallScreen ? 10 : 12),
           _buildSocialButton(
             onPressed: _isLoading ? null : _signInWithApple,
             icon: const Icon(Icons.apple, color: Colors.white, size: 22),
             label: 'Apple',
+            height: buttonHeight,
+            isSmallScreen: isSmallScreen,
           ),
         ],
       ],
@@ -338,14 +408,16 @@ class _LoginPageState extends State<LoginPage> {
     required VoidCallback? onPressed,
     required Widget icon,
     required String label,
+    required double height,
+    required bool isSmallScreen,
   }) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: height,
       child: OutlinedButton.icon(
         onPressed: onPressed,
         icon: icon,
-        label: Text(label),
+        label: Text(label, style: TextStyle(fontSize: isSmallScreen ? 14 : 15)),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.white,
           side: BorderSide(color: Colors.white.withOpacity(0.2)),
@@ -360,13 +432,21 @@ class _LoginPageState extends State<LoginPage> {
   InputDecoration _inputDecoration({
     required String label,
     required IconData icon,
+    required bool isSmallScreen,
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+      labelStyle: TextStyle(
+        color: Colors.white.withOpacity(0.6),
+        fontSize: isSmallScreen ? 14 : 16,
+      ),
       prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.6)),
       filled: true,
       fillColor: Colors.white.withOpacity(0.05),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isSmallScreen ? 14 : 18,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,

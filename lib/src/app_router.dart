@@ -30,9 +30,7 @@ class _PopToHomeState extends State<_PopToHome> {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF0B0F1A),
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

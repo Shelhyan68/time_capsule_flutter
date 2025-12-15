@@ -59,11 +59,6 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
     if (picked != null) setState(() => _mediaFiles.add(File(picked.path)));
   }
 
-  Future<void> _pickVideo() async {
-    final picked = await _imagePicker.pickVideo(source: ImageSource.gallery);
-    if (picked != null) setState(() => _mediaFiles.add(File(picked.path)));
-  }
-
   // ─── Sauvegarde ────────────────────────────────────────
   Future<void> _saveCapsule() async {
     if (_titleController.text.isEmpty || _openDate == null) {
@@ -132,6 +127,7 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
             sendDate: _openDate!,
             senderName: senderName,
             letter: _letterController.text,
+            mediaUrls: mediaUrls,
           );
 
           // Déterminer si l'email part immédiatement ou plus tard
@@ -337,11 +333,6 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
                               spacing: 12,
                               children: [
                                 _mediaButton(Icons.photo, 'Photo', _pickImage),
-                                _mediaButton(
-                                  Icons.videocam,
-                                  'Vidéo',
-                                  _pickVideo,
-                                ),
                               ],
                             ),
                             const SizedBox(height: 16),
