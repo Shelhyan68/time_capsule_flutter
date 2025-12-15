@@ -49,9 +49,15 @@ class OpenedCapsuleContent extends StatelessWidget {
     } else {
       contentWidgets.addAll(
         capsule.mediaUrls.map((url) {
-          final ext = url.split('.').last.toLowerCase();
+          // Vérifier si c'est une image (Firebase Storage URLs contiennent le nom du fichier encodé)
+          final urlLower = url.toLowerCase();
+          final isImage = urlLower.contains('.jpg') ||
+              urlLower.contains('.jpeg') ||
+              urlLower.contains('.png') ||
+              urlLower.contains('.gif') ||
+              urlLower.contains('.webp');
 
-          if (ext == 'jpg' || ext == 'png' || ext == 'jpeg') {
+          if (isImage) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: ClipRRect(
