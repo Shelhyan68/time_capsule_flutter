@@ -94,6 +94,26 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-5px); }
     }
+    .open-app-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      margin-top: 16px;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .open-app-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+    .open-app-btn:active {
+      transform: translateY(0);
+    }
     .app-name {
       font-size: 14px;
       color: rgba(255,255,255,0.5);
@@ -118,17 +138,47 @@
     <p class="subtitle">Votre lien de connexion a été vérifié avec succès.</p>
     
     <div class="instruction">
-      <p>Retournez dans l'application</p>
-      <span class="arrow">👆</span>
+      <p>Cliquez sur le bouton pour ouvrir l'application</p>
+      <a href="#" id="openAppBtn" class="open-app-btn">Ouvrir Time Capsule</a>
     </div>
     
-    <p class="close-hint">Vous pouvez fermer cette page</p>
+    <p class="close-hint">Vous pouvez fermer cette page après</p>
     <p class="app-name">Time Capsule</p>
   </div>
 
   <script>
     console.log('Page action handler chargée');
     console.log('URL:', window.location.href);
+    
+    // Récupérer les paramètres de l'URL
+    const fullUrl = window.location.href;
+    const params = window.location.search;
+    
+    // Construire le deep link avec les paramètres Firebase Auth
+    const deepLink = 'https://time-capsule-5ecb5.web.app/action' + params;
+    
+    // Pour Android, utiliser intent://
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let appLink;
+    
+    if (isAndroid) {
+      // Intent URL pour Android - force l'ouverture de l'app
+      appLink = 'intent://time-capsule-5ecb5.web.app/action' + params + 
+        '#Intent;scheme=https;package=com.example.time_capsule;end';
+    } else {
+      // Pour iOS et autres
+      appLink = deepLink;
+    }
+    
+    console.log('Deep link:', appLink);
+    
+    // Configurer le bouton
+    document.getElementById('openAppBtn').href = appLink;
+    document.getElementById('openAppBtn').addEventListener('click', function(e) {
+      // Sur Android, le intent:// va ouvrir l'app
+      // On laisse le comportement par défaut du lien
+      console.log('Opening app with:', appLink);
+    });
   </script>
 </body>
 </html>
