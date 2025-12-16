@@ -51,7 +51,8 @@ class OpenedCapsuleContent extends StatelessWidget {
         capsule.mediaUrls.map((url) {
           // Vérifier si c'est une image (Firebase Storage URLs contiennent le nom du fichier encodé)
           final urlLower = url.toLowerCase();
-          final isImage = urlLower.contains('.jpg') ||
+          final isImage =
+              urlLower.contains('.jpg') ||
               urlLower.contains('.jpeg') ||
               urlLower.contains('.png') ||
               urlLower.contains('.gif') ||
