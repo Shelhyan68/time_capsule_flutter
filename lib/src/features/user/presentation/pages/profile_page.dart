@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/src/core/constants/app_constants.dart';
 import '/src/core/widgets/space_background.dart';
 import '../../data/user_service.dart';
@@ -131,17 +132,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_currentProfile == null) return;
 
     setState(() => _isLoading = true);
 
     try {
-      final photoUrl = await _uploadProfileImage();
+      // Upload la nouvelle image si elle existe
+      String? photoUrl = _currentProfile!.photoUrl;
+      if (_newProfileImage != null) {
+        photoUrl = await _uploadProfileImage();
+      }
 
-      final updatedProfile = _currentProfile!.copyWith(
+      final updatedProfile = UserProfile(
+        uid: _currentProfile!.uid,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         photoUrl: photoUrl,
+        email: _currentProfile!.email,
         birthDate: _birthDate,
+        createdAt: _currentProfile!.createdAt,
         updatedAt: DateTime.now(),
       );
 
@@ -576,6 +585,35 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            // Politique de confidentialité
+                            Center(
+                              child: TextButton.icon(
+                                onPressed: () async {
+                                  final url = Uri.parse(
+                                    'https://time-capsule-5ecb5.web.app/privacy-policy.html',
+                                  );
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(
+                                      url,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.privacy_tip_outlined,
+                                  size: 18,
+                                  color: AppColors.textSecondary,
+                                ),
+                                label: const Text(
+                                  'Politique de confidentialité',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),

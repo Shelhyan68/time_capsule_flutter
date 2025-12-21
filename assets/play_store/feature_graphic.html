@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeCapsule - Feature Graphic 1024x500</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            padding: 40px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .feature-graphic {
+            width: 1024px;
+            height: 500px;
+            background: linear-gradient(135deg, #0B0F1A 0%, #151b2e 30%, #1a2040 50%, #151b2e 70%, #0B0F1A 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Étoiles animées */
+        .stars-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+        
+        .star.twinkle {
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* Effets de glow cosmiques */
+        .cosmic-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+        }
+        
+        .glow-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(66, 165, 245, 0.5) 0%, transparent 70%);
+            top: -150px;
+            left: -100px;
+        }
+        
+        .glow-2 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(171, 71, 188, 0.5) 0%, transparent 70%);
+            bottom: -100px;
+            right: 50px;
+        }
+        
+        .glow-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(105, 240, 174, 0.3) 0%, transparent 70%);
+            top: 50%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Zone de contenu principal */
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 40px 60px;
+        }
+        
+        /* Partie gauche - Texte */
+        .text-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 40px;
+        }
+        
+        .app-title {
+            font-size: 52px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 8px;
+            text-shadow: 0 4px 30px rgba(66, 165, 245, 0.5);
+            letter-spacing: -1px;
+        }
+        
+        .app-title .time {
+            background: linear-gradient(135deg, #42a5f5 0%, #69f0ae 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .app-title .capsule {
+            background: linear-gradient(135deg, #ab47bc 0%, #42a5f5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 28px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+        
+        .tagline em {
+            font-style: normal;
+            color: #69f0ae;
+            font-weight: 600;
+        }
+        
+        /* Features badges */
+        .features {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 12px 20px;
+            border-radius: 50px;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .feature-badge .icon {
+            font-size: 20px;
+        }
+        
+        /* Partie droite - Visuel */
+        .visual-section {
+            width: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Mockup smartphone */
+        .phone-mockup {
+            width: 220px;
+            height: 440px;
+            background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%);
+            border-radius: 36px;
+            padding: 12px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            transform: perspective(800px) rotateY(-8deg) rotateX(2deg);
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0B0F1A 0%, #151b2e 100%);
+            border-radius: 26px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .phone-notch {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 24px;
+            background: #0B0F1A;
+            border-radius: 12px;
+        }
+        
+        /* Contenu du téléphone */
+        .phone-content {
+            padding: 50px 16px 16px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .phone-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .phone-header h3 {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .phone-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+        }
+        
+        /* Cartes de capsules dans le téléphone */
+        .capsule-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .capsule-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #42a5f5, #ab47bc);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .capsule-info h4 {
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .capsule-info p {
+            color: #69f0ae;
+            font-size: 9px;
+        }
+        
+        /* Bouton flottant */
+        .fab-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #42a5f5 0%, #ab47bc 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 25px rgba(66, 165, 245, 0.4);
+        }
+        
+        /* Éléments décoratifs flottants */
+        .floating-element {
+            position: absolute;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .floating-1 {
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(66, 165, 245, 0.2) 0%, rgba(171, 71, 188, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(8deg);
+        }
+        
+        .floating-1 .emoji {
+            font-size: 32px;
+        }
+        
+        .floating-2 {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(105, 240, 174, 0.2) 0%, rgba(66, 165, 245, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            bottom: 40px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-5deg);
+        }
+        
+        .floating-2 .emoji {
+            font-size: 28px;
+        }
+        
+        /* Orbite décorative */
+        .orbit-ring {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .orbit-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #69f0ae;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #69f0ae;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Instructions */
+        .instructions {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="feature-graphic">
+        <!-- Étoiles -->
+        <div class="stars-layer">
+            <div class="star" style="width: 2px; height: 2px; top: 10%; left: 5%;"></div>
+            <div class="star twinkle" style="width: 3px; height: 3px; top: 15%; left: 15%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 8%; left: 25%;"></div>
+            <div class="star twinkle" style="width: 4px; height: 4px; top: 20%; left: 35%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 5%; left: 50%;"></div>
+            <div class="star" style="width: 3px; height: 3px; top: 12%; left: 65%;"></div>
+            <div class="star twinkle" style="width: 2px; height: 2px; top: 18%; left: 78%;"></div>
+            <div class="star" style="width: 3px; height: 3px; top: 8%; left: 88%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 85%; left: 8%;"></div>
+            <div class="star twinkle" style="width: 3px; height: 3px; top: 90%; left: 20%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 88%; left: 40%;"></div>
+            <div class="star" style="width: 4px; height: 4px; top: 92%; left: 55%;"></div>
+            <div class="star twinkle" style="width: 2px; height: 2px; top: 85%; left: 70%;"></div>
+            <div class="star" style="width: 3px; height: 3px; top: 90%; left: 92%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 50%; left: 3%;"></div>
+            <div class="star" style="width: 2px; height: 2px; top: 45%; left: 97%;"></div>
+        </div>
+        
+        <!-- Glows cosmiques -->
+        <div class="cosmic-glow glow-1"></div>
+        <div class="cosmic-glow glow-2"></div>
+        <div class="cosmic-glow glow-3"></div>
+        
+        <!-- Contenu -->
+        <div class="content">
+            <!-- Section texte -->
+            <div class="text-section">
+                <h1 class="app-title">
+                    <span class="time">Time</span><span class="capsule">Capsule</span>
+                </h1>
+                <p class="tagline">Souvenirs <em>du futur</em></p>
+                
+                <div class="features">
+                    <div class="feature-badge">
+                        <span class="icon">📸</span>
+                        <span>Photos & Messages</span>
+                    </div>
+                    <div class="feature-badge">
+                        <span class="icon">⏰</span>
+                        <span>Envoi programmé</span>
+                    </div>
+                    <div class="feature-badge">
+                        <span class="icon">💌</span>
+                        <span>Partage par email</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section visuelle -->
+            <div class="visual-section">
+                <div class="orbit-ring">
+                    <div class="orbit-dot"></div>
+                </div>
+                
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="phone-notch"></div>
+                        <div class="phone-content">
+                            <div class="phone-header">
+                                <h3>Mes Capsules</h3>
+                                <p>3 capsules programmées</p>
+                            </div>
+                            
+                            <div class="capsule-card">
+                                <div class="capsule-icon">🎂</div>
+                                <div class="capsule-info">
+                                    <h4>Anniversaire 2025</h4>
+                                    <p>📅 25 décembre 2025</p>
+                                </div>
+                            </div>
+                            
+                            <div class="capsule-card">
+                                <div class="capsule-icon">🎓</div>
+                                <div class="capsule-info">
+                                    <h4>Ma Graduation</h4>
+                                    <p>📅 15 juin 2026</p>
+                                </div>
+                            </div>
+                            
+                            <div class="capsule-card">
+                                <div class="capsule-icon">💝</div>
+                                <div class="capsule-info">
+                                    <h4>Message à moi-même</h4>
+                                    <p>📅 1 janvier 2030</p>
+                                </div>
+                            </div>
+                            
+                            <div class="fab-button">+</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Éléments flottants -->
+                <div class="floating-element floating-1">
+                    <span class="emoji">⏳</span>
+                </div>
+                <div class="floating-element floating-2">
+                    <span class="emoji">✉️</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        📸 Pour exporter en PNG 1024x500 :<br>
+        Chrome DevTools (F12) → Sélectionne l'élément .feature-graphic → Clic droit → "Capture node screenshot"
+    </div>
+</body>
+</html>

@@ -7,12 +7,28 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:465196584764:android:e5a9c17efc950336d29839",
+        "mobilesdk_app_id": "1:465196584764:android:f172e6b74896e948d29839",
         "android_client_info": {
-          "package_name": "com.example.time_capsule"
+          "package_name": "com.simacreation.timecapsule"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "465196584764-5dl4vd9eo9g3eci10fa220cdrmtoda6q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simacreation.timecapsule",
+            "certificate_hash": "8c7a25980f791865de9c202f9bdef81e9c92629e"
+          }
+        },
+        {
+          "client_id": "465196584764-fot7n492jk3v6kjmll8hpcnk37vcp0oe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simacreation.timecapsule",
+            "certificate_hash": "923abff819f5a86b7073d4a82fbf8606f48e289d"
+          }
+        },
         {
           "client_id": "465196584764-l75olv7841u0aen9ram2jqsf6u283700.apps.googleusercontent.com",
           "client_type": 3

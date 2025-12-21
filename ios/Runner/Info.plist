@@ -15,6 +15,17 @@
 </array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+<string>Nous avons besoin d'accéder à tes photos pour les ajouter à tes capsules temporelles</string>
+
+<key>NSCameraUsageDescription</key>
+<string>Nous avons besoin d'accéder à la caméra pour prendre des photos pour tes capsules</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>Nous avons besoin d'accéder au micro pour enregistrer des vidéos</string>
+
+<key>NSUserTrackingUsageDescription</key>
+<string>Cette autorisation aide à personnaliser ton expérience</string>
 	<key>CFBundleDisplayName</key>
 	<string>Time Capsule</string>
 	<key>CFBundleExecutable</key>

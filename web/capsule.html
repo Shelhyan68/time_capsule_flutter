@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ouvrir TimeCapsule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0B0F1A 0%, #1a1f2e 50%, #0B0F1A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+        .logo {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .logo .time {
+            background: linear-gradient(135deg, #42a5f5 0%, #69f0ae 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo .capsule {
+            background: linear-gradient(135deg, #ab47bc 0%, #42a5f5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hourglass {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #69f0ae;
+        }
+        p {
+            font-size: 16px;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #42a5f5 0%, #ab47bc 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(66, 165, 245, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .store-badges {
+            margin-top: 40px;
+        }
+        .store-badges img {
+            height: 50px;
+            margin: 5px;
+        }
+        .loading {
+            display: none;
+            color: #69f0ae;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hourglass">⏳</div>
+        <div class="logo">
+            <span class="time">Time</span><span class="capsule">Capsule</span>
+        </div>
+        <h1>Une capsule t'attend !</h1>
+        <p>Quelqu'un t'a envoyé un souvenir du passé. Ouvre l'application TimeCapsule pour le découvrir.</p>
+        
+        <a href="#" id="openApp" class="btn">📱 Ouvrir l'application</a>
+        
+        <p class="loading" id="loading">Ouverture de l'application...</p>
+        
+        <div class="store-badges">
+            <p style="font-size: 14px; margin-bottom: 15px;">Tu n'as pas encore l'app ?</p>
+            <a href="https://play.google.com/store/apps/details?id=com.simacreation.timecapsule" target="_blank">
+                <img src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png" alt="Disponible sur Google Play" height="60">
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer l'ID de la capsule depuis l'URL
+        const path = window.location.pathname;
+        const capsuleId = path.split('/capsule/')[1];
+        
+        // Deep link vers l'app
+        const deepLink = `timecapsule://capsule/${capsuleId}`;
+        const webAppLink = `https://time-capsule-5ecb5.web.app/capsule/${capsuleId}`;
+        const playStoreLink = 'https://play.google.com/store/apps/details?id=com.simacreation.timecapsule';
+        
+        // Détecter le système
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        document.getElementById('openApp').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            
+            if (isAndroid) {
+                // Intent Android
+                const intentUrl = `intent://capsule/${capsuleId}#Intent;scheme=timecapsule;package=com.simacreation.timecapsule;end`;
+                window.location.href = intentUrl;
+                
+                // Fallback vers Play Store après 2 secondes
+                setTimeout(function() {
+                    window.location.href = playStoreLink;
+                }, 2000);
+            } else if (isIOS) {
+                // iOS Universal Link
+                window.location.href = deepLink;
+                
+                // Fallback vers App Store après 2 secondes
+                setTimeout(function() {
+                    // window.location.href = appStoreLink;
+                }, 2000);
+            } else {
+                // Desktop - afficher un message
+                alert('Ouvre ce lien sur ton téléphone pour voir la capsule dans l\'app !');
+            }
+        });
+        
+        // Auto-redirect sur mobile après 1 seconde
+        if (isAndroid || isIOS) {
+            setTimeout(function() {
+                document.getElementById('openApp').click();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

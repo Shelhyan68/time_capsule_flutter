@@ -13,7 +13,7 @@ class AuthRepository {
 
   // Configuration Magic Link
   static const String _continueUrl = 'https://time-capsule-5ecb5.web.app';
-  static const String _androidPackageName = 'com.example.time_capsule';
+  static const String _androidPackageName = 'com.simacreation.timecapsule';
   static const String _iosBundleId = 'com.example.timeCapsule';
 
   // ─────────────────────────────────────────────────────────────────────

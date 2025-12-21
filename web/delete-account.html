@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer mon compte - TimeCapsule</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0B0F1A 0%, #1a1f2e 50%, #0B0F1A 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .logo .time {
+            background: linear-gradient(135deg, #42a5f5 0%, #69f0ae 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo .capsule {
+            background: linear-gradient(135deg, #ab47bc 0%, #42a5f5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .warning-box {
+            background: rgba(255, 82, 82, 0.15);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .warning-box h3 {
+            color: #ff5252;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-box ul {
+            margin-left: 20px;
+            color: #ffab91;
+        }
+
+        .warning-box li {
+            margin-bottom: 8px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            color: #69f0ae;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #42a5f5, #ab47bc);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .step-content p {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .email-box {
+            background: rgba(66, 165, 245, 0.15);
+            border: 1px solid rgba(66, 165, 245, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .email-box p {
+            margin-bottom: 15px;
+            color: #b0b0b0;
+        }
+
+        .email-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #42a5f5 0%, #ab47bc 100%);
+            color: white;
+            text-decoration: none;
+            padding: 14px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .email-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(66, 165, 245, 0.3);
+        }
+
+        .info-box {
+            background: rgba(105, 240, 174, 0.1);
+            border: 1px solid rgba(105, 240, 174, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            color: #69f0ae;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: #42a5f5;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer p {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="time">Time</span><span class="capsule">Capsule</span>
+            </div>
+            <h1>🗑️ Supprimer mon compte</h1>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ Attention - Action irréversible</h3>
+            <p>La suppression de votre compte entraînera la perte définitive de :</p>
+            <ul>
+                <li>Toutes vos capsules temporelles (envoyées et en attente)</li>
+                <li>Tous vos messages et photos</li>
+                <li>Votre historique et vos préférences</li>
+                <li>Les emails programmés non encore envoyés</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📱 Méthode 1 : Depuis l'application</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrez TimeCapsule</h4>
+                    <p>Lancez l'application et connectez-vous à votre compte</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Accédez à votre profil</h4>
+                    <p>Appuyez sur l'icône de profil en bas à droite de l'écran</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Supprimez votre compte</h4>
+                    <p>Faites défiler vers le bas et appuyez sur "Supprimer mon compte", puis confirmez</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📧 Méthode 2 : Par email</h2>
+            <p style="margin-bottom: 20px; color: #a0a0a0;">
+                Si vous ne pouvez pas accéder à l'application, envoyez-nous un email avec l'adresse associée à votre compte :
+            </p>
+            
+            <div class="email-box">
+                <p>Cliquez sur le bouton ci-dessous pour envoyer une demande de suppression :</p>
+                <a href="mailto:music.music.music68@gmail.com?subject=Demande%20de%20suppression%20de%20compte%20TimeCapsule&body=Bonjour%2C%0A%0AJe%20souhaite%20supprimer%20définitivement%20mon%20compte%20TimeCapsule.%0A%0AAdresse%20email%20du%20compte%20%3A%20%5BVotre%20email%5D%0A%0AJe%20comprends%20que%20cette%20action%20est%20irréversible%20et%20que%20toutes%20mes%20données%20seront%20supprimées.%0A%0ACordialement" class="email-link">
+                    ✉️ Demander la suppression
+                </a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>ℹ️ Informations importantes</h3>
+            <p>
+                <strong>Délai de traitement :</strong> Votre demande sera traitée dans un délai de 48 heures.<br><br>
+                <strong>Données supprimées :</strong> Toutes vos données personnelles, capsules, messages et photos seront définitivement effacés de nos serveurs.<br><br>
+                <strong>Emails programmés :</strong> Les capsules programmées pour être envoyées dans le futur seront annulées.
+            </p>
+        </div>
+
+        <div class="footer">
+            <a href="privacy-policy.html">← Retour à la Politique de confidentialité</a>
+            <p>© 2025 TimeCapsule - Sima Création Web</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -17,31 +17,45 @@ class EmailService {
     required String senderName,
     required String letter,
     List<String>? mediaUrls,
+    String? creatorUserId,
   }) async {
     try {
-      // Normaliser les dates pour la comparaison (ignorer l'heure)
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final targetDate = DateTime(sendDate.year, sendDate.month, sendDate.day);
-
-      // Si la date d'envoi est aujourd'hui ou passée, envoyer immédiatement
-      final shouldSendNow =
-          targetDate.isBefore(today) || targetDate.isAtSameMomentAs(today);
-
       await _firestore.collection('scheduled_emails').add({
         'capsuleId': capsuleId,
         'to': recipientEmail,
         'recipientName': recipientName,
         'senderName': senderName,
         'capsuleTitle': capsuleTitle,
-        'sendDate': Timestamp.fromDate(shouldSendNow ? now : sendDate),
-        'status': shouldSendNow ? 'immediate' : 'pending',
+        'sendDate': Timestamp.fromDate(sendDate),
+        'status': 'pending',
         'createdAt': FieldValue.serverTimestamp(),
         'letter': letter,
         'mediaUrls': mediaUrls ?? [],
+        'creatorUserId': creatorUserId,
       });
     } catch (e) {
       throw Exception('Erreur lors de la planification de l\'email: $e');
+    }
+  }
+
+  /// Planifie une notification pour une capsule personnelle (sans destinataire email)
+  Future<void> scheduleNotification({
+    required String capsuleId,
+    required String userId,
+    required String capsuleTitle,
+    required DateTime sendDate,
+  }) async {
+    try {
+      await _firestore.collection('scheduled_notifications').add({
+        'capsuleId': capsuleId,
+        'userId': userId,
+        'capsuleTitle': capsuleTitle,
+        'sendDate': Timestamp.fromDate(sendDate),
+        'status': 'pending',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Erreur lors de la planification de la notification: $e');
     }
   }
 

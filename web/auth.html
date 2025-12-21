@@ -109,8 +109,6 @@
         <div class="spinner"></div>
 
         <button id="openAppBtn" class="btn" style="display: none;">📱 Ouvrir l'application</button>
-
-        <p id="debug" style="font-size: 12px; color: #666; margin-top: 20px;"></p>
     </div>
 
     <script type="module">
@@ -124,8 +122,6 @@
         // Reconstruire le lien complet pour l'app
         const fullLink = window.location.href;
 
-        // Debug
-        document.getElementById('debug').textContent = `URL: ${fullLink.substring(0, 50)}...`;
         console.log('Auth page loaded');
         console.log('Mode:', mode);
         console.log('Full link:', fullLink);
@@ -141,15 +137,10 @@
                 const intentUrl = `intent://auth?link=${encodeURIComponent(fullLink)}#Intent;scheme=timecapsule;package=com.simacreation.timecapsule;end`;
 
                 console.log('Opening Android intent:', intentUrl);
-                document.getElementById('debug').textContent = 'Opening app...';
-
                 window.location.href = intentUrl;
 
                 // Fallback vers Play Store après 2 secondes si l'app ne s'ouvre pas
                 setTimeout(() => {
-                    document.getElementById('title').textContent = 'App non installée';
-                    document.getElementById('message').textContent = 'Télécharge TimeCapsule depuis le Play Store';
-                    document.querySelector('.spinner').style.display = 'none';
                     window.location.href = 'https://play.google.com/store/apps/details?id=com.simacreation.timecapsule';
                 }, 2000);
             } else if (isIOS) {
@@ -161,16 +152,15 @@
 
                 // Fallback vers App Store après 2 secondes
                 setTimeout(() => {
+                    // TODO: Ajouter le lien App Store quand disponible
                     document.getElementById('title').textContent = 'App non installée';
                     document.getElementById('message').textContent = 'Télécharge TimeCapsule depuis l\'App Store';
-                    document.querySelector('.spinner').style.display = 'none';
                 }, 2000);
             } else {
                 // Desktop - afficher le bouton manuel
                 document.getElementById('title').textContent = 'Ouvre ce lien sur ton téléphone';
                 document.getElementById('message').textContent = 'Cette page doit être ouverte sur un appareil mobile avec TimeCapsule installé.';
                 document.querySelector('.spinner').style.display = 'none';
-                document.getElementById('openAppBtn').style.display = 'inline-block';
             }
         }
 

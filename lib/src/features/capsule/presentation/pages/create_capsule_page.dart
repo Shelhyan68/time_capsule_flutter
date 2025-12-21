@@ -26,6 +26,7 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
   final ImagePicker _imagePicker = ImagePicker();
 
   DateTime? _openDate;
+  TimeOfDay? _openTime;
   final List<File> _mediaFiles = [];
 
   bool _isLoading = false;
@@ -40,16 +41,53 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
     super.dispose();
   }
 
-  // ─── Date ──────────────────────────────────────────────
+  // ─── Date + Heure ──────────────────────────────────────
   Future<void> _pickDate() async {
+    final minDateTime = DateTime.now().add(const Duration(minutes: 5));
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 1)),
-      firstDate: DateTime.now(),
+      initialDate: minDateTime,
+      firstDate: minDateTime,
       lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
     if (picked != null) {
       setState(() => _openDate = picked);
+
+      // Demander l'heure juste après la date
+      if (mounted) {
+        final now = DateTime.now();
+        final initialTime = picked.day == now.day &&
+                           picked.month == now.month &&
+                           picked.year == now.year
+            ? TimeOfDay(hour: now.hour, minute: now.minute + 5)
+            : TimeOfDay.now();
+
+        final timePicked = await showTimePicker(
+          context: context,
+          initialTime: initialTime,
+          helpText: 'Choisir l\'heure d\'ouverture (min +5 min)',
+        );
+        if (timePicked != null) {
+          // Vérifier que la date/heure finale est au moins dans 5 minutes
+          final selectedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            timePicked.hour,
+            timePicked.minute,
+          );
+
+          if (selectedDateTime.isBefore(DateTime.now().add(const Duration(minutes: 5)))) {
+            if (mounted) {
+              _showMessage('L\'heure d\'ouverture doit être au minimum dans 5 minutes');
+            }
+            setState(() => _openTime = null);
+          } else {
+            setState(() => _openTime = timePicked);
+          }
+        }
+      }
     }
   }
 
@@ -84,10 +122,20 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
 
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('Utilisateur non connecté');
+
+      // Combiner date + heure (si heure non définie, utiliser 12:00)
+      final finalDateTime = DateTime(
+        _openDate!.year,
+        _openDate!.month,
+        _openDate!.day,
+        _openTime?.hour ?? 12,
+        _openTime?.minute ?? 0,
+      );
+
       final capsule = CapsuleModel(
         id: '', // Firestore va générer l'id
         title: _titleController.text,
-        openDate: _openDate!,
+        openDate: finalDateTime,
         mediaUrls: mediaUrls,
         letter: _letterController.text.isEmpty ? null : _letterController.text,
         recipientName: _hasRecipient && _recipientNameController.text.isNotEmpty
@@ -98,11 +146,18 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
             ? _recipientEmailController.text
             : null,
         userId: user.uid,
+        capsuleType: _hasRecipient && _recipientEmailController.text.isNotEmpty
+            ? 'sent'
+            : null,
       );
 
       final docRef = await FirebaseFirestore.instance
           .collection('capsules')
           .add(capsule.toMap());
+
+      final emailService = EmailService(
+        firestore: FirebaseFirestore.instance,
+      );
 
       // Planifier l'email si un destinataire est défini
       if (_hasRecipient &&
@@ -116,18 +171,16 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
           final currentProfile = await userService.getCurrentUserProfile();
           final senderName = currentProfile?.fullName ?? 'Un ami';
 
-          final emailService = EmailService(
-            firestore: FirebaseFirestore.instance,
-          );
           await emailService.scheduleEmail(
             capsuleId: docRef.id,
             recipientEmail: _recipientEmailController.text.trim(),
             recipientName: _recipientNameController.text.trim(),
             capsuleTitle: _titleController.text,
-            sendDate: _openDate!,
+            sendDate: finalDateTime,
             senderName: senderName,
             letter: _letterController.text,
             mediaUrls: mediaUrls,
+            creatorUserId: user.uid,
           );
 
           // Déterminer si l'email part immédiatement ou plus tard
@@ -162,8 +215,23 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
             );
           }
         }
-      } else if (mounted) {
-        _showMessage('Capsule scellée dans le temps');
+      } else {
+        // Capsule personnelle (sans destinataire) - planifier juste la notification
+        try {
+          await emailService.scheduleNotification(
+            capsuleId: docRef.id,
+            userId: user.uid,
+            capsuleTitle: _titleController.text,
+            sendDate: finalDateTime,
+          );
+          if (mounted) {
+            _showMessage('Capsule scellée dans le temps');
+          }
+        } catch (e) {
+          if (mounted) {
+            _showMessage('Capsule créée mais erreur notification: ${e.toString()}');
+          }
+        }
       }
 
       if (!mounted) return;
@@ -205,10 +273,15 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
               onPressed: () async {
                 try {
                   await authRepository.signOut();
+                  if (context.mounted) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
                 } catch (e) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
                 }
               },
             ),
@@ -275,14 +348,17 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
                             ),
                             const SizedBox(height: 16),
 
-                            // Date
+                            // Date + Heure (l'heure sera demandée après la date)
                             OutlinedButton.icon(
                               onPressed: _pickDate,
                               icon: const Icon(Icons.calendar_month),
                               label: Text(
                                 _openDate == null
-                                    ? "Choisir la date d'ouverture"
-                                    : 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}',
+                                    ? "Choisir la date et l'heure d'ouverture"
+                                    : _openTime == null
+                                        ? 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year}'
+                                        : 'Ouverture : ${_openDate!.day}/${_openDate!.month}/${_openDate!.year} à ${_openTime!.hour.toString().padLeft(2, '0')}:${_openTime!.minute.toString().padLeft(2, '0')}',
+                                textAlign: TextAlign.center,
                               ),
                             ),
                             const SizedBox(height: 16),

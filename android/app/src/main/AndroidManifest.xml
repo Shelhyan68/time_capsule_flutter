@@ -1,6 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.simacreation.timecapsule">
+    <!-- Permissions nécessaires pour Firebase et l'app -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
-        android:label="time_capsule"
+        android:label="Time Capsule"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -25,6 +30,14 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="https" android:host="time-capsule-5ecb5.web.app" />
+    </intent-filter>
+
+    <!-- Intent filter pour le chemin /action sur web.app (Magic Link) -->
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" android:host="time-capsule-5ecb5.web.app" android:pathPrefix="/action" />
     </intent-filter>
 
     <!-- Intent filter pour firebaseapp.com - tous les chemins auth -->

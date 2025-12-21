@@ -18,6 +18,11 @@ migrate_working_dir/
 *.iws
 .idea/
 
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
@@ -38,6 +43,11 @@ migrate_working_dir/
 /android/local.properties
 .env
 
+# Fichiers de signature Android - NE PAS COMMITTER
+/android/key.properties
+/android/*.jks
+/android/*.keystore
+
 # Symbolication related
 app.*.symbols
 
@@ -48,3 +58,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Fichiers temporaires et backup
+nul
+*.old_backup
+.claude/

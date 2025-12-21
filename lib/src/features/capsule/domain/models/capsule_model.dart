@@ -9,6 +9,8 @@ class CapsuleModel {
   final String? recipientName;
   final String? recipientEmail;
   final String userId;
+  final String? capsuleType; // 'sent', 'received', ou null pour les capsules personnelles
+  final String? senderName; // Nom de l'expéditeur pour les capsules reçues
 
   CapsuleModel({
     required this.id,
@@ -19,6 +21,8 @@ class CapsuleModel {
     this.recipientName,
     this.recipientEmail,
     required this.userId,
+    this.capsuleType,
+    this.senderName,
   });
 
   factory CapsuleModel.fromDoc(DocumentSnapshot doc) {
@@ -32,6 +36,8 @@ class CapsuleModel {
       recipientName: data['recipientName'],
       recipientEmail: data['recipientEmail'],
       userId: data['userId'] ?? '',
+      capsuleType: data['capsuleType'],
+      senderName: data['senderName'],
     );
   }
 
@@ -43,6 +49,8 @@ class CapsuleModel {
     'recipientName': recipientName,
     'recipientEmail': recipientEmail,
     'userId': userId,
+    'capsuleType': capsuleType,
+    'senderName': senderName,
   };
 
   Map<String, dynamic> toFirestore() => toMap();

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeCapsule - App Icon 512x512</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a2e;
+            padding: 40px;
+        }
+        
+        .icon-container {
+            width: 512px;
+            height: 512px;
+            position: relative;
+        }
+        
+        .app-icon {
+            width: 512px;
+            height: 512px;
+            background: linear-gradient(135deg, #0B0F1A 0%, #1a1f2e 50%, #0B0F1A 100%);
+            border-radius: 110px; /* ~22% pour Android */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Étoiles de fond */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        /* Cercles de glow */
+        .glow-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+        }
+        
+        .glow-1 {
+            width: 300px;
+            height: 300px;
+            background: rgba(66, 165, 245, 0.4);
+            top: -50px;
+            right: -50px;
+        }
+        
+        .glow-2 {
+            width: 250px;
+            height: 250px;
+            background: rgba(171, 71, 188, 0.4);
+            bottom: -30px;
+            left: -30px;
+        }
+        
+        .glow-3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(105, 240, 174, 0.2);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Sablier central */
+        .hourglass-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .hourglass {
+            width: 200px;
+            height: 280px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Cadre du sablier */
+        .hourglass-frame-top,
+        .hourglass-frame-bottom {
+            width: 180px;
+            height: 16px;
+            background: linear-gradient(180deg, #ffd700 0%, #ffaa00 50%, #ff8c00 100%);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            z-index: 5;
+        }
+        
+        .hourglass-frame-top {
+            position: absolute;
+            top: 0;
+        }
+        
+        .hourglass-frame-bottom {
+            position: absolute;
+            bottom: 0;
+        }
+        
+        /* Corps du sablier */
+        .hourglass-body {
+            position: absolute;
+            top: 16px;
+            bottom: 16px;
+            width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .glass-top {
+            width: 140px;
+            height: 110px;
+            background: linear-gradient(180deg, rgba(66, 165, 245, 0.3) 0%, rgba(66, 165, 245, 0.1) 100%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-bottom: none;
+            border-radius: 70px 70px 0 0;
+            clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sand-top {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(180deg, #69f0ae 0%, #42a5f5 100%);
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 0 20px rgba(105, 240, 174, 0.6);
+        }
+        
+        .glass-middle {
+            width: 20px;
+            height: 24px;
+            background: linear-gradient(180deg, rgba(66, 165, 245, 0.2) 0%, rgba(171, 71, 188, 0.2) 100%);
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            border-right: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .sand-stream {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 30px;
+            background: linear-gradient(180deg, #69f0ae, #42a5f5, #ab47bc);
+            border-radius: 3px;
+            box-shadow: 0 0 15px rgba(105, 240, 174, 0.8);
+        }
+        
+        .glass-bottom {
+            width: 140px;
+            height: 110px;
+            background: linear-gradient(0deg, rgba(171, 71, 188, 0.3) 0%, rgba(171, 71, 188, 0.1) 100%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: none;
+            border-radius: 0 0 70px 70px;
+            clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sand-bottom {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 50px;
+            background: linear-gradient(0deg, #ab47bc 0%, #42a5f5 50%, #69f0ae 100%);
+            border-radius: 50px 50px 40px 40px;
+            box-shadow: 0 0 25px rgba(171, 71, 188, 0.6);
+        }
+        
+        /* Orbite décorative */
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            height: 380px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .orbit-dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #69f0ae;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #69f0ae, 0 0 40px rgba(105, 240, 174, 0.5);
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .orbit-dot-2 {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #42a5f5;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #42a5f5;
+            bottom: 30px;
+            right: 30px;
+        }
+        
+        .orbit-dot-3 {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ab47bc;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ab47bc;
+            bottom: 60px;
+            left: 40px;
+        }
+        
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="icon-container">
+        <div class="app-icon">
+            <!-- Étoiles -->
+            <div class="stars">
+                <div class="star" style="width: 3px; height: 3px; top: 15%; left: 12%;"></div>
+                <div class="star" style="width: 4px; height: 4px; top: 25%; left: 85%;"></div>
+                <div class="star" style="width: 3px; height: 3px; top: 70%; left: 15%;"></div>
+                <div class="star" style="width: 4px; height: 4px; top: 80%; left: 80%;"></div>
+                <div class="star" style="width: 3px; height: 3px; top: 45%; left: 8%;"></div>
+                <div class="star" style="width: 3px; height: 3px; top: 35%; left: 92%;"></div>
+                <div class="star" style="width: 2px; height: 2px; top: 60%; left: 88%;"></div>
+                <div class="star" style="width: 2px; height: 2px; top: 20%; left: 25%;"></div>
+            </div>
+            
+            <!-- Glow effects -->
+            <div class="glow-circle glow-1"></div>
+            <div class="glow-circle glow-2"></div>
+            <div class="glow-circle glow-3"></div>
+            
+            <!-- Orbite -->
+            <div class="orbit">
+                <div class="orbit-dot"></div>
+            </div>
+            <div class="orbit-dot-2"></div>
+            <div class="orbit-dot-3"></div>
+            
+            <!-- Sablier -->
+            <div class="hourglass-container">
+                <div class="hourglass">
+                    <div class="hourglass-frame-top"></div>
+                    <div class="hourglass-body">
+                        <div class="glass-top">
+                            <div class="sand-top"></div>
+                        </div>
+                        <div class="glass-middle">
+                            <div class="sand-stream"></div>
+                        </div>
+                        <div class="glass-bottom">
+                            <div class="sand-bottom"></div>
+                        </div>
+                    </div>
+                    <div class="hourglass-frame-bottom"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        📸 Pour exporter en PNG 512x512 :<br>
+        Ouvre les DevTools (F12) → Clique droit sur l'icône → "Capture node screenshot"<br>
+        Ou utilise un outil comme <strong>html2canvas</strong> ou <strong>hcti.io</strong>
+    </div>
+</body>
+</html>

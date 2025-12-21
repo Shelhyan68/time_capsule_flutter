@@ -57,6 +57,10 @@
     ],
     "rewrites": [
       {
+        "source": "/capsule/**",
+        "destination": "/capsule.html"
+      },
+      {
         "source": "/action",
         "destination": "/action/index.html"
       },

@@ -53,9 +53,11 @@ class DashboardPage extends StatelessWidget {
                 try {
                   await authRepository.signOut();
                 } catch (e) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
                 }
               },
             ),
@@ -256,9 +258,7 @@ class DashboardPage extends StatelessWidget {
                                                               ),
                                                             ),
                                                           ),
-                                                          if (capsule
-                                                                  .recipientEmail !=
-                                                              null)
+                                                          if (capsule.capsuleType != null)
                                                             Container(
                                                               padding:
                                                                   const EdgeInsets.symmetric(
@@ -267,21 +267,17 @@ class DashboardPage extends StatelessWidget {
                                                                     vertical: 4,
                                                                   ),
                                                               decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .blue
-                                                                    .withOpacity(
-                                                                      0.2,
-                                                                    ),
+                                                                color: capsule.capsuleType == 'received'
+                                                                    ? Colors.green.withOpacity(0.2)
+                                                                    : Colors.blue.withOpacity(0.2),
                                                                 borderRadius:
                                                                     BorderRadius.circular(
                                                                       12,
                                                                     ),
                                                                 border: Border.all(
-                                                                  color: Colors
-                                                                      .blue
-                                                                      .withOpacity(
-                                                                        0.5,
-                                                                      ),
+                                                                  color: capsule.capsuleType == 'received'
+                                                                      ? Colors.green.withOpacity(0.5)
+                                                                      : Colors.blue.withOpacity(0.5),
                                                                 ),
                                                               ),
                                                               child: Row(
@@ -290,21 +286,25 @@ class DashboardPage extends StatelessWidget {
                                                                         .min,
                                                                 children: [
                                                                   Icon(
-                                                                    Icons.email,
+                                                                    capsule.capsuleType == 'received'
+                                                                        ? Icons.card_giftcard
+                                                                        : Icons.email,
                                                                     size: 14,
-                                                                    color: Colors
-                                                                        .blue
-                                                                        .shade200,
+                                                                    color: capsule.capsuleType == 'received'
+                                                                        ? Colors.green.shade200
+                                                                        : Colors.blue.shade200,
                                                                   ),
                                                                   const SizedBox(
                                                                     width: 4,
                                                                   ),
                                                                   Text(
-                                                                    'Envoyée',
+                                                                    capsule.capsuleType == 'received'
+                                                                        ? 'Reçue'
+                                                                        : 'Envoyée',
                                                                     style: TextStyle(
-                                                                      color: Colors
-                                                                          .blue
-                                                                          .shade200,
+                                                                      color: capsule.capsuleType == 'received'
+                                                                          ? Colors.green.shade200
+                                                                          : Colors.blue.shade200,
                                                                       fontSize:
                                                                           11,
                                                                       fontWeight:
@@ -318,6 +318,17 @@ class DashboardPage extends StatelessWidget {
                                                         ],
                                                       ),
                                                       const SizedBox(height: 4),
+                                                      if (capsule.capsuleType == 'received' && capsule.senderName != null)
+                                                        Text(
+                                                          'De: ${capsule.senderName}',
+                                                          style: TextStyle(
+                                                            color: Colors.green.shade200,
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      if (capsule.capsuleType == 'received' && capsule.senderName != null)
+                                                        const SizedBox(height: 2),
                                                       Text(
                                                         'Ouverture: ${capsule.openDate.day}/${capsule.openDate.month}/${capsule.openDate.year}',
                                                         style: const TextStyle(

@@ -27,6 +27,6 @@ class CapsuleCard extends StatelessWidget {
 
 extension DateHelpers on DateTime {
   String toShortDateString() {
-    return "${day}/${month}/${year}";
+    return "$day/$month/$year";
   }
 }

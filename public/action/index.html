@@ -163,11 +163,10 @@
     
     if (isAndroid) {
       // Intent URL pour Android - force l'ouverture de l'app
-      appLink = 'intent://time-capsule-5ecb5.web.app/action' + params + 
-        '#Intent;scheme=https;package=com.example.time_capsule;end';
+      appLink = `intent://auth?link=${encodeURIComponent(fullUrl)}#Intent;scheme=timecapsule;package=com.simacreation.timecapsule;end`;
     } else {
       // Pour iOS et autres
-      appLink = deepLink;
+      appLink = `timecapsule://auth?link=${encodeURIComponent(fullUrl)}`;
     }
     
     console.log('Deep link:', appLink);

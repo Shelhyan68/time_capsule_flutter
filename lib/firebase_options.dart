@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCuAb_-KCQEosSyrkofti_Y3GwQ1h33t1k',
-    appId: '1:465196584764:android:e5a9c17efc950336d29839',
+    appId: '1:465196584764:android:f172e6b74896e948d29839',
     messagingSenderId: '465196584764',
     projectId: 'time-capsule-5ecb5',
     storageBucket: 'time-capsule-5ecb5.firebasestorage.app',
