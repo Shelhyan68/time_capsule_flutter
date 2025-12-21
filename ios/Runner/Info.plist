@@ -2,30 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<key>CFBundleURLTypes</key>
-<array>
-    <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-            <string>https</string>
-        </array>
-    </dict>
-</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-<string>Nous avons besoin d'accéder à tes photos pour les ajouter à tes capsules temporelles</string>
-
-<key>NSCameraUsageDescription</key>
-<string>Nous avons besoin d'accéder à la caméra pour prendre des photos pour tes capsules</string>
-
-<key>NSMicrophoneUsageDescription</key>
-<string>Nous avons besoin d'accéder au micro pour enregistrer des vidéos</string>
-
-<key>NSUserTrackingUsageDescription</key>
-<string>Cette autorisation aide à personnaliser ton expérience</string>
 	<key>CFBundleDisplayName</key>
 	<string>Time Capsule</string>
 	<key>CFBundleExecutable</key>
@@ -42,9 +22,48 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>https</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.465196584764-v7ln4qmp2s4k7lusmul507rvlbsdbuth</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>timecapsule</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>GIDClientID</key>
+	<string>465196584764-v7ln4qmp2s4k7lusmul507rvlbsdbuth.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Nous avons besoin d'accéder à la caméra pour prendre des photos pour tes capsules</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Nous avons besoin d'accéder au micro pour enregistrer des vidéos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Nous avons besoin d'accéder à tes photos pour les ajouter à tes capsules temporelles</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Cette autorisation aide à personnaliser ton expérience</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -63,9 +82,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
 </dict>
 </plist>
