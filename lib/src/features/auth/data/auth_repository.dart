@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 /// Repository centralisé pour toutes les opérations d'authentification.
 /// Supporte : Magic Link, Google Sign-In, Apple Sign-In (iOS).
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Configuration Magic Link
@@ -75,26 +77,67 @@ class AuthRepository {
   // ─────────────────────────────────────────────────────────────────────
 
   /// Connexion avec Google
+  /// Crée automatiquement le profil utilisateur avec les données Google
   Future<UserCredential> signInWithGoogle() async {
+    UserCredential userCredential;
+
     // Web
     if (kIsWeb) {
       final googleProvider = GoogleAuthProvider();
-      return await _auth.signInWithPopup(googleProvider);
+      userCredential = await _auth.signInWithPopup(googleProvider);
+    } else {
+      // Mobile (Android/iOS)
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        throw AuthException('Connexion Google annulée');
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      userCredential = await _auth.signInWithCredential(credential);
     }
 
-    // Mobile (Android/iOS)
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) {
-      throw AuthException('Connexion Google annulée');
+    final user = userCredential.user;
+
+    if (user != null) {
+      // Vérifier si le profil existe déjà
+      final profileDoc = await _firestore.collection('users').doc(user.uid).get();
+
+      if (!profileDoc.exists) {
+        // Extraire prénom et nom depuis displayName
+        String firstName = '';
+        String lastName = '';
+
+        if (user.displayName != null) {
+          final nameParts = user.displayName!.split(' ');
+          firstName = nameParts.isNotEmpty ? nameParts.first : '';
+          lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        }
+
+        if (firstName.isEmpty) {
+          firstName = 'Utilisateur';
+        }
+
+        // Créer le profil automatiquement
+        await _firestore.collection('users').doc(user.uid).set({
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': user.email ?? '',
+          'photoUrl': user.photoURL,
+          'birthDate': null,
+          'createdAt': Timestamp.now(),
+          'updatedAt': null,
+        });
+
+        debugPrint('✅ Profil Google créé automatiquement: $firstName $lastName');
+      }
     }
 
-    final googleAuth = await googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    return await _auth.signInWithCredential(credential);
+    return userCredential;
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -102,6 +145,7 @@ class AuthRepository {
   // ─────────────────────────────────────────────────────────────────────
 
   /// Connexion avec Apple (iOS uniquement)
+  /// Crée automatiquement le profil utilisateur avec les données Apple
   Future<UserCredential> signInWithApple() async {
     if (!Platform.isIOS && !Platform.isMacOS) {
       throw AuthException('Apple Sign-In disponible uniquement sur iOS/macOS');
@@ -119,7 +163,47 @@ class AuthRepository {
       accessToken: appleCredential.authorizationCode,
     );
 
-    return await _auth.signInWithCredential(oauthCredential);
+    final userCredential = await _auth.signInWithCredential(oauthCredential);
+    final user = userCredential.user;
+
+    if (user != null) {
+      // Vérifier si le profil existe déjà
+      final profileDoc = await _firestore.collection('users').doc(user.uid).get();
+
+      if (!profileDoc.exists) {
+        // Apple ne fournit le nom que lors de la première connexion
+        // Utiliser les données Apple si disponibles, sinon utiliser displayName de Firebase
+        String firstName = appleCredential.givenName ?? '';
+        String lastName = appleCredential.familyName ?? '';
+
+        // Si Apple n'a pas fourni le nom, essayer avec displayName de Firebase
+        if (firstName.isEmpty && lastName.isEmpty && user.displayName != null) {
+          final nameParts = user.displayName!.split(' ');
+          firstName = nameParts.isNotEmpty ? nameParts.first : '';
+          lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        }
+
+        // Si toujours vide, utiliser "Utilisateur" par défaut
+        if (firstName.isEmpty) {
+          firstName = 'Utilisateur';
+        }
+
+        // Créer le profil automatiquement
+        await _firestore.collection('users').doc(user.uid).set({
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': user.email ?? appleCredential.email ?? '',
+          'photoUrl': user.photoURL,
+          'birthDate': null,
+          'createdAt': Timestamp.now(),
+          'updatedAt': null,
+        });
+
+        debugPrint('✅ Profil Apple créé automatiquement: $firstName $lastName');
+      }
+    }
+
+    return userCredential;
   }
 
   // ─────────────────────────────────────────────────────────────────────

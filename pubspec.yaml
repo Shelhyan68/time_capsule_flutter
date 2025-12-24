@@ -1,5 +1,5 @@
 name: time_capsule
-description: "A new Flutter project."
+description: 'A new Flutter project.'
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+57
+version: 1.0.0+59
 
 environment:
   sdk: ^3.9.2
@@ -31,22 +31,21 @@ dependencies:
   flutter:
     sdk: flutter
 
-  file_picker: ^8.1.6   # Pour choisir fichiers/documents
-  image_picker: ^1.1.2  # Pour prendre ou choisir des photos/vidéos
+  file_picker: ^8.1.6 # Pour choisir fichiers/documents
+  image_picker: ^1.1.2 # Pour prendre ou choisir des photos/vidéos
   firebase_core: ^3.8.1
   firebase_auth: ^5.3.4
   app_links: ^6.3.2
   shared_preferences: ^2.2.2
   cloud_firestore: ^5.5.2
   firebase_storage: ^12.3.6
-  firebase_messaging: ^15.0.0  # Pour les notifications push
+  firebase_messaging: ^15.0.0 # Pour les notifications push
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.0
-  cached_network_image: ^3.3.1  # Cache optimisé pour les images réseau
-  url_launcher: ^6.2.1  # Pour ouvrir les liens externes
+  cached_network_image: ^3.3.1 # Cache optimisé pour les images réseau
+  url_launcher: ^6.2.1 # Pour ouvrir les liens externes
 
-  webview_flutter: ^4.7.0  # Pour afficher le HTML dans une WebView
-
+  webview_flutter: ^4.7.0 # Pour afficher le HTML dans une WebView
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -65,18 +64,18 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.1
 
 flutter_launcher_icons:
+  remove_alpha_ios: true
   android: true
   ios: true
-  image_path: "assets/icon.png"
-  adaptive_icon_background: "#0B0F1A"
-  adaptive_icon_foreground: "assets/icon.png"
+  image_path: 'assets/icon.png'
+  adaptive_icon_background: '#0B0F1A'
+  adaptive_icon_foreground: 'assets/icon.png'
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

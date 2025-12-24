@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>465196584764-v7ln4qmp2s4k7lusmul507rvlbsdbuth.apps.googleusercontent.com</string>
+	<string>465196584764-gqa3c3o348ktvtqnu5h0n85ktkaf93ga.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.465196584764-v7ln4qmp2s4k7lusmul507rvlbsdbuth</string>
+	<string>com.googleusercontent.apps.465196584764-gqa3c3o348ktvtqnu5h0n85ktkaf93ga</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>465196584764-5dl4vd9eo9g3eci10fa220cdrmtoda6q.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.simacreationweb.timecapsule</string>
+	<string>com.simacreationweb.timecapsule2025</string>
 	<key>PROJECT_ID</key>
 	<string>time-capsule-5ecb5</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:465196584764:ios:df1989446f839ee2d29839</string>
+	<string>1:465196584764:ios:3104c87739f0d752d29839</string>
 </dict>
 </plist>

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Time Capsule</string>
+	<string>TimeCapsule 2025</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -61,8 +61,6 @@
 	<string>Nous avons besoin d'accéder au micro pour enregistrer des vidéos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Nous avons besoin d'accéder à tes photos pour les ajouter à tes capsules temporelles</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Cette autorisation aide à personnaliser ton expérience</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
