@@ -6,8 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '/src/core/constants/app_constants.dart';
 import '/src/core/widgets/space_background.dart';
+import '/src/core/widgets/animated_led_border.dart';
 import '../../data/user_service.dart';
 import '../../domain/models/user_profile.dart';
 
@@ -172,6 +175,61 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _reauthenticateUser() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Récupérer la méthode de connexion utilisée
+    final providerData = user.providerData;
+    if (providerData.isEmpty) {
+      throw Exception('Aucune méthode d\'authentification trouvée');
+    }
+
+    final providerId = providerData.first.providerId;
+
+    try {
+      if (providerId == 'google.com') {
+        // Ré-authentification Google
+        final GoogleSignIn googleSignIn = GoogleSignIn();
+        final googleUser = await googleSignIn.signIn();
+        if (googleUser == null) {
+          throw Exception('Ré-authentification annulée');
+        }
+
+        final googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await user.reauthenticateWithCredential(credential);
+      } else if (providerId == 'apple.com') {
+        // Ré-authentification Apple
+        final appleCredential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+            AppleIDAuthorizationScopes.email,
+          ],
+        );
+
+        final oauthCredential = OAuthProvider('apple.com').credential(
+          idToken: appleCredential.identityToken,
+          accessToken: appleCredential.authorizationCode,
+        );
+
+        await user.reauthenticateWithCredential(oauthCredential);
+      } else if (providerId == 'password') {
+        // Pour Magic Link, on demande de renvoyer un lien
+        throw Exception(
+          'Veuillez vous reconnecter via le magic link avant de supprimer votre compte',
+        );
+      } else {
+        throw Exception('Méthode d\'authentification non supportée: $providerId');
+      }
+    } catch (e) {
+      throw Exception('Échec de la ré-authentification: $e');
+    }
+  }
+
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -206,6 +264,9 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
+
+      // Ré-authentifier l'utilisateur avant la suppression
+      await _reauthenticateUser();
 
       // Supprimer le profil
       await _userService.deleteUserProfile(user.uid);
@@ -279,16 +340,21 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(AppSizes.paddingLarge),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      maxWidth: AppSizes.maxContentWidth,
-                    ),
-                    padding: const EdgeInsets.all(AppSizes.paddingLarge),
-                    decoration: AppStyles.glassContainer(),
+              child: AnimatedLedBorder(
+                borderRadius: AppSizes.radiusLarge,
+                borderWidth: 2,
+                glowIntensity: 10,
+                animationDuration: const Duration(seconds: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusLarge),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        maxWidth: AppSizes.maxContentWidth,
+                      ),
+                      padding: const EdgeInsets.all(AppSizes.paddingLarge),
+                      decoration: AppStyles.glassContainer(),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -627,6 +693,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

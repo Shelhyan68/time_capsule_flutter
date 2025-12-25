@@ -10,6 +10,7 @@ import '/src/features/capsule/domain/models/capsule_model.dart';
 import '/src/features/capsule/data/email_service.dart';
 import '/src/features/user/data/user_service.dart';
 import '/src/core/widgets/space_background.dart';
+import '/src/core/widgets/animated_led_border.dart';
 
 class CreateCapsulePage extends StatefulWidget {
   const CreateCapsulePage({super.key});
@@ -294,19 +295,21 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.12),
+                  child: AnimatedLedBorder(
+                    borderRadius: 28,
+                    borderWidth: 2,
+                    glowIntensity: 10,
+                    animationDuration: const Duration(seconds: 4),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(28),
                           ),
-                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -460,6 +463,7 @@ class _CreateCapsulePageState extends State<CreateCapsulePage> {
                       ), // Container
                     ), // BackdropFilter
                   ), // ClipRRect
+                  ), // AnimatedLedBorder
                 ), // ConstrainedBox
               ), // Center
             ), // Padding

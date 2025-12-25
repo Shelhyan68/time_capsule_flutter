@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../data/auth_repository.dart';
+import '/src/core/widgets/animated_led_border.dart';
+import '/src/core/widgets/space_background.dart';
 
 /// Page de connexion avec 3 méthodes : Magic Link, Google, Apple (iOS).
 class LoginPage extends StatefulWidget {
@@ -108,30 +110,32 @@ class _LoginPageState extends State<LoginPage> {
     final horizontalPadding = screenWidth < 360 ? 16.0 : 24.0;
     final verticalPadding = isSmallScreen ? 12.0 : 24.0;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B0F1A),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: verticalPadding,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - (verticalPadding * 2),
+    return SpaceBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
                 ),
-                child: Center(
-                  child: _buildCard(
-                    isSmallScreen: isSmallScreen,
-                    isVerySmallScreen: isVerySmallScreen,
-                    screenWidth: screenWidth,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - (verticalPadding * 2),
+                  ),
+                  child: Center(
+                    child: _buildCard(
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
+                      screenWidth: screenWidth,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -144,21 +148,25 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     final cardPadding = isSmallScreen ? 20.0 : 28.0;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          width: double.infinity,
-          constraints: BoxConstraints(
-            maxWidth: screenWidth < 500 ? double.infinity : 400,
-          ),
-          padding: EdgeInsets.all(cardPadding),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
-          ),
+    return AnimatedLedBorder(
+      borderRadius: 28,
+      borderWidth: 2,
+      glowIntensity: 10,
+      animationDuration: const Duration(seconds: 3),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            width: double.infinity,
+            constraints: BoxConstraints(
+              maxWidth: screenWidth < 500 ? double.infinity : 400,
+            ),
+            padding: EdgeInsets.all(cardPadding),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(28),
+            ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -174,6 +182,7 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -24,6 +24,16 @@ class _SpaceBackgroundState extends State<SpaceBackground>
       duration: const Duration(seconds: 60),
     )..repeat();
 
+    // Couleurs LED identiques aux bordures
+    const ledColors = [
+      Color(0xFF42A5F5), // Bleu
+      Color(0xFFAB47BC), // Violet
+      Color(0xFF69F0AE), // Vert
+      Color(0xFFFF6B9D), // Rose
+      Color(0xFFFFA726), // Orange
+      Color(0xFF00E5FF), // Cyan
+    ];
+
     // Réduire à 50 étoiles pour de meilleures performances
     for (int i = 0; i < 50; i++) {
       _stars.add(
@@ -34,6 +44,7 @@ class _SpaceBackgroundState extends State<SpaceBackground>
           speed: _random.nextDouble() * 0.5 + 0.2,
           brightness: _random.nextDouble() * 0.8 + 0.2,
           twinkleSpeed: _random.nextDouble() * 2 + 1,
+          color: ledColors[_random.nextInt(ledColors.length)],
         ),
       );
     }
@@ -80,6 +91,7 @@ class Star {
   final double speed;
   final double brightness;
   final double twinkleSpeed;
+  final Color color;
 
   Star({
     required this.x,
@@ -88,6 +100,7 @@ class Star {
     required this.speed,
     required this.brightness,
     required this.twinkleSpeed,
+    required this.color,
   });
 }
 
@@ -100,8 +113,9 @@ class SpacePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (var star in stars) {
-      // Déplacement vertical (effet de vitesse spatiale)
-      star.y = (star.y + star.speed * 0.002) % 1.0;
+      // Déplacement diagonal (effet étoile filante)
+      star.y = (star.y + star.speed * 0.003) % 1.0;
+      star.x = (star.x + star.speed * 0.001) % 1.0;
 
       // Position en pixels
       final double x = star.x * size.width;
@@ -109,55 +123,58 @@ class SpacePainter extends CustomPainter {
 
       // Effet de scintillement
       final twinkle = sin(animationValue * 2 * pi * star.twinkleSpeed);
-      final opacity = (star.brightness + twinkle * 0.3).clamp(0.0, 1.0);
+      final opacity = (star.brightness + twinkle * 0.2).clamp(0.3, 1.0);
 
-      // Gradient radial pour l'effet de lueur
-      final paint = Paint()
-        ..shader =
-            RadialGradient(
-              colors: [
-                Color.lerp(
-                  Colors.white,
-                  Colors.blue.shade200,
-                  star.brightness,
-                )!.withOpacity(opacity),
-                Colors.transparent,
-              ],
-              stops: const [0.0, 1.0],
-            ).createShader(
-              Rect.fromCircle(center: Offset(x, y), radius: star.size * 3),
-            );
+      // Longueur de la traînée basée sur la vitesse
+      final trailLength = star.size * 15 + (star.speed * 30);
 
-      // Dessiner l'étoile principale
-      canvas.drawCircle(Offset(x, y), star.size, paint);
+      // Point de départ (haut-gauche) et point d'arrivée (bas-droite)
+      final startX = x - trailLength * 0.7;
+      final startY = y - trailLength;
+      final endX = x;
+      final endY = y;
 
-      // Ajouter un petit halo pour les grosses étoiles
-      if (star.size > 1.5) {
-        final haloPaint = Paint()
-          ..color = Colors.white.withOpacity(opacity * 0.1)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        canvas.drawCircle(Offset(x, y), star.size * 2, haloPaint);
-      }
+      // Traînée d'étoile filante avec gradient diagonal
+      final trailPaint = Paint()
+        ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.transparent,
+              star.color.withValues(alpha: opacity * 0.3),
+              star.color.withValues(alpha: opacity * 0.8),
+              star.color.withValues(alpha: opacity),
+            ],
+            stops: const [0.0, 0.4, 0.8, 1.0],
+          ).createShader(
+            Rect.fromPoints(Offset(startX, startY), Offset(endX, endY)),
+          )
+        ..strokeWidth = star.size * 1.2
+        ..strokeCap = StrokeCap.round;
 
-      // Traînée lumineuse simplifiée (seulement pour les étoiles très rapides)
-      if (star.speed > 0.45) {
-        final trailPaint = Paint()
-          ..shader =
-              LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(opacity * 0.3),
-                  Colors.transparent,
-                ],
-              ).createShader(
-                Rect.fromPoints(Offset(x, y - star.size * 3), Offset(x, y)),
-              )
-          ..strokeWidth = star.size * 0.5
-          ..strokeCap = StrokeCap.round;
+      // Dessiner la traînée
+      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), trailPaint);
 
-        canvas.drawLine(Offset(x, y - star.size * 3), Offset(x, y), trailPaint);
-      }
+      // Point lumineux à l'extrémité (tête de l'étoile filante)
+      final headPaint = Paint()
+        ..shader = RadialGradient(
+            colors: [
+              star.color.withValues(alpha: opacity),
+              star.color.withValues(alpha: opacity * 0.5),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ).createShader(
+            Rect.fromCircle(center: Offset(endX, endY), radius: star.size * 3),
+          );
+
+      canvas.drawCircle(Offset(endX, endY), star.size * 1.5, headPaint);
+
+      // Glow autour du point lumineux
+      final glowPaint = Paint()
+        ..color = star.color.withValues(alpha: opacity * 0.4)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      canvas.drawCircle(Offset(endX, endY), star.size * 2.5, glowPaint);
     }
   }
 

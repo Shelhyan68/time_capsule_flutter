@@ -11,6 +11,7 @@ import '/src/features/capsule/presentation/widgets/empty_capsule_state.dart';
 import '/src/features/user/data/user_service.dart';
 import '/src/features/user/domain/models/user_profile.dart';
 import '/src/core/widgets/space_background.dart';
+import '/src/core/widgets/animated_led_border.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -67,18 +68,22 @@ class DashboardPage extends StatelessWidget {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 520),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
-                    ),
+              child: AnimatedLedBorder(
+                borderRadius: 28,
+                borderWidth: 2,
+                glowIntensity: 10,
+                animationDuration: const Duration(seconds: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(28),
+                      ),
                     child: Column(
                       children: [
                         StreamBuilder<UserProfile?>(
@@ -222,11 +227,16 @@ class DashboardPage extends StatelessWidget {
                                         }
                                       }
                                     },
-                                    child: Card(
-                                      color: Colors.white.withOpacity(0.1),
-                                      margin: const EdgeInsets.only(bottom: 12),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12),
+                                    child: AnimatedLedBorder(
+                                      borderRadius: 12,
+                                      borderWidth: 1.5,
+                                      glowIntensity: 8,
+                                      animationDuration: const Duration(seconds: 3),
+                                      child: Card(
+                                        color: Colors.white.withValues(alpha: 0.1),
+                                        margin: const EdgeInsets.only(bottom: 12),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -365,6 +375,7 @@ class DashboardPage extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    ),
                                   );
                                 },
                               );
@@ -378,6 +389,7 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
           ),
+        ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {

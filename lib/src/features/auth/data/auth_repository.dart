@@ -158,6 +158,22 @@ class AuthRepository {
       ],
     );
 
+    debugPrint('🍎 Apple Credential reçu:');
+    debugPrint('   - givenName: ${appleCredential.givenName}');
+    debugPrint('   - familyName: ${appleCredential.familyName}');
+    debugPrint('   - email: ${appleCredential.email}');
+
+    // Sauvegarder le nom si fourni (première connexion uniquement)
+    final prefs = await SharedPreferences.getInstance();
+    if (appleCredential.givenName != null && appleCredential.givenName!.isNotEmpty) {
+      await prefs.setString('apple_given_name', appleCredential.givenName!);
+      debugPrint('✅ Prénom Apple sauvegardé: ${appleCredential.givenName}');
+    }
+    if (appleCredential.familyName != null && appleCredential.familyName!.isNotEmpty) {
+      await prefs.setString('apple_family_name', appleCredential.familyName!);
+      debugPrint('✅ Nom Apple sauvegardé: ${appleCredential.familyName}');
+    }
+
     final oauthCredential = OAuthProvider('apple.com').credential(
       idToken: appleCredential.identityToken,
       accessToken: appleCredential.authorizationCode,
@@ -171,21 +187,26 @@ class AuthRepository {
       final profileDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (!profileDoc.exists) {
-        // Apple ne fournit le nom que lors de la première connexion
-        // Utiliser les données Apple si disponibles, sinon utiliser displayName de Firebase
-        String firstName = appleCredential.givenName ?? '';
-        String lastName = appleCredential.familyName ?? '';
+        // Récupérer le nom depuis Apple ou depuis SharedPreferences
+        String firstName = appleCredential.givenName ??
+                          prefs.getString('apple_given_name') ?? '';
+        String lastName = appleCredential.familyName ??
+                         prefs.getString('apple_family_name') ?? '';
+
+        debugPrint('📝 Nom récupéré - Prénom: "$firstName", Nom: "$lastName"');
 
         // Si Apple n'a pas fourni le nom, essayer avec displayName de Firebase
         if (firstName.isEmpty && lastName.isEmpty && user.displayName != null) {
           final nameParts = user.displayName!.split(' ');
           firstName = nameParts.isNotEmpty ? nameParts.first : '';
           lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+          debugPrint('📝 Nom depuis displayName - Prénom: "$firstName", Nom: "$lastName"');
         }
 
         // Si toujours vide, utiliser "Utilisateur" par défaut
         if (firstName.isEmpty) {
           firstName = 'Utilisateur';
+          debugPrint('⚠️ Aucun nom trouvé, utilisation du défaut: "Utilisateur"');
         }
 
         // Créer le profil automatiquement
@@ -200,6 +221,8 @@ class AuthRepository {
         });
 
         debugPrint('✅ Profil Apple créé automatiquement: $firstName $lastName');
+      } else {
+        debugPrint('ℹ️ Profil existant trouvé pour ${user.uid}');
       }
     }
 
