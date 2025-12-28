@@ -265,19 +265,26 @@ class _ProfilePageState extends State<ProfilePage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      // Ré-authentifier l'utilisateur avant la suppression
-      await _reauthenticateUser();
-
-      // Supprimer le profil
+      // Supprimer le profil Firestore
       await _userService.deleteUserProfile(user.uid);
 
-      // Supprimer le compte Firebase Auth
+      // Tenter de supprimer le compte Firebase Auth
       await user.delete();
 
       if (!mounted) return;
 
       // Retour à la page de connexion
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        // Si la ré-authentification est requise, déconnecter et rediriger
+        await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
+        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+        _showMessage('Veuillez vous reconnecter pour supprimer votre compte');
+      } else {
+        _showMessage('Erreur: ${e.message}');
+      }
     } catch (e) {
       _showMessage('Erreur: $e');
     } finally {

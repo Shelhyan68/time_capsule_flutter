@@ -227,16 +227,18 @@ class DashboardPage extends StatelessWidget {
                                         }
                                       }
                                     },
-                                    child: AnimatedLedBorder(
-                                      borderRadius: 12,
-                                      borderWidth: 1.5,
-                                      glowIntensity: 8,
-                                      animationDuration: const Duration(seconds: 3),
-                                      child: Card(
-                                        color: Colors.white.withValues(alpha: 0.1),
-                                        margin: const EdgeInsets.only(bottom: 12),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: AnimatedLedBorder(
+                                        borderRadius: 12,
+                                        borderWidth: 1.5,
+                                        glowIntensity: 8,
+                                        animationDuration: const Duration(seconds: 3),
+                                        child: Card(
+                                          color: Colors.white.withValues(alpha: 0.1),
+                                          margin: EdgeInsets.zero,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12),
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -374,6 +376,7 @@ class DashboardPage extends StatelessWidget {
                                           ],
                                         ),
                                       ),
+                                    ),
                                     ),
                                     ),
                                   );
