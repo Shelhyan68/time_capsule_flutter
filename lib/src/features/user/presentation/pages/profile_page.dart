@@ -6,8 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '/src/core/constants/app_constants.dart';
 import '/src/core/widgets/space_background.dart';
 import '/src/core/widgets/animated_led_border.dart';
@@ -175,61 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _reauthenticateUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    // Récupérer la méthode de connexion utilisée
-    final providerData = user.providerData;
-    if (providerData.isEmpty) {
-      throw Exception('Aucune méthode d\'authentification trouvée');
-    }
-
-    final providerId = providerData.first.providerId;
-
-    try {
-      if (providerId == 'google.com') {
-        // Ré-authentification Google
-        final GoogleSignIn googleSignIn = GoogleSignIn();
-        final googleUser = await googleSignIn.signIn();
-        if (googleUser == null) {
-          throw Exception('Ré-authentification annulée');
-        }
-
-        final googleAuth = await googleUser.authentication;
-        final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-
-        await user.reauthenticateWithCredential(credential);
-      } else if (providerId == 'apple.com') {
-        // Ré-authentification Apple
-        final appleCredential = await SignInWithApple.getAppleIDCredential(
-          scopes: [
-            AppleIDAuthorizationScopes.email,
-          ],
-        );
-
-        final oauthCredential = OAuthProvider('apple.com').credential(
-          idToken: appleCredential.identityToken,
-          accessToken: appleCredential.authorizationCode,
-        );
-
-        await user.reauthenticateWithCredential(oauthCredential);
-      } else if (providerId == 'password') {
-        // Pour Magic Link, on demande de renvoyer un lien
-        throw Exception(
-          'Veuillez vous reconnecter via le magic link avant de supprimer votre compte',
-        );
-      } else {
-        throw Exception('Méthode d\'authentification non supportée: $providerId');
-      }
-    } catch (e) {
-      throw Exception('Échec de la ré-authentification: $e');
-    }
-  }
-
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -240,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'Cette action est irréversible. Toutes vos données seront supprimées.',
+          'Cette action est irréversible. Toutes vos données seront supprimées définitivement.',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -263,27 +206,29 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        _showMessage('Utilisateur non connecté');
+        return;
+      }
 
       // Supprimer le profil Firestore
       await _userService.deleteUserProfile(user.uid);
 
-      // Tenter de supprimer le compte Firebase Auth
+      // Supprimer le compte Firebase Auth
       await user.delete();
 
       if (!mounted) return;
 
-      // Retour à la page de connexion
+      // Rediriger vers la page de connexion
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+
+      _showMessage('Compte supprimé avec succès');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
-        // Si la ré-authentification est requise, déconnecter et rediriger
-        await FirebaseAuth.instance.signOut();
-        if (!mounted) return;
-        Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-        _showMessage('Veuillez vous reconnecter pour supprimer votre compte');
+        // Si la session est trop ancienne, demander à l'utilisateur de se reconnecter
+        _showMessage('Votre session a expiré. Veuillez vous déconnecter et vous reconnecter avant de supprimer votre compte.');
       } else {
-        _showMessage('Erreur: ${e.message}');
+        _showMessage('Erreur Firebase: ${e.message}');
       }
     } catch (e) {
       _showMessage('Erreur: $e');
