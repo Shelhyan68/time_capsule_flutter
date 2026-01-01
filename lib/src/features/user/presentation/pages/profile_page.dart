@@ -202,26 +202,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (confirmed != true) return;
 
-    // Afficher un indicateur de chargement fullscreen
+    // Utiliser l'état de chargement de la page au lieu d'un dialog
     if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => PopScope(
-        canPop: false,
-        child: const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.capsuleUnlocked,
-          ),
-        ),
-      ),
-    );
+    setState(() => _isLoading = true);
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        if (mounted) Navigator.pop(context); // Fermer le loader
-        _showMessage('Utilisateur non connecté');
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showMessage('Utilisateur non connecté');
+        }
         return;
       }
 
@@ -231,25 +222,23 @@ class _ProfilePageState extends State<ProfilePage> {
       // Supprimer le compte Firebase Auth
       await user.delete();
 
-      // Fermer le loader et retourner à la racine
-      if (mounted) {
-        // Fermer le loader
-        Navigator.pop(context);
-        // Retourner à la racine (login) - forcer la navigation
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) Navigator.pop(context); // Fermer le loader
+      // Pas besoin de réinitialiser _isLoading ou de naviguer
+      // Le StreamBuilder dans main.dart va automatiquement détecter
+      // la déconnexion et rediriger vers LoginPage
 
-      if (e.code == 'requires-recent-login') {
-        // Si la session est trop ancienne, demander à l'utilisateur de se reconnecter
-        _showMessage('Votre session a expiré. Veuillez vous déconnecter et vous reconnecter avant de supprimer votre compte.');
-      } else {
-        _showMessage('Erreur Firebase: ${e.message}');
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (e.code == 'requires-recent-login') {
+          _showMessage('Votre session a expiré. Veuillez vous déconnecter et vous reconnecter avant de supprimer votre compte.');
+        } else {
+          _showMessage('Erreur Firebase: ${e.message}');
+        }
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Fermer le loader
+        setState(() => _isLoading = false);
         _showMessage('Erreur: $e');
       }
     }
