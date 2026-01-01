@@ -132,8 +132,21 @@ class UpdateDialog extends StatelessWidget {
   }
 
   Future<void> _openUpdateUrl(BuildContext context) async {
-    final urlString = updateInfo.updateUrl ??
-        'https://play.google.com/store/apps/details?id=com.simacreation.timecapsule';
+    String urlString;
+
+    if (updateInfo.updateUrl != null) {
+      // Si une URL personnalisée est fournie, l'utiliser
+      urlString = updateInfo.updateUrl!;
+    } else {
+      // Sinon, détecter la plateforme et utiliser l'URL appropriée
+      if (Theme.of(context).platform == TargetPlatform.iOS) {
+        // URL de l'App Store (à remplacer par votre ID d'app une fois publiée)
+        urlString = 'https://apps.apple.com/app/idVOTRE_APP_ID';
+      } else {
+        // URL du Play Store pour Android
+        urlString = 'https://play.google.com/store/apps/details?id=com.simacreation.timecapsule';
+      }
+    }
 
     final url = Uri.parse(urlString);
 

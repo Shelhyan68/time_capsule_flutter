@@ -202,11 +202,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
+    // Afficher un indicateur de chargement fullscreen
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.capsuleUnlocked,
+          ),
+        ),
+      ),
+    );
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
+        if (mounted) Navigator.pop(context); // Fermer le loader
         _showMessage('Utilisateur non connecté');
         return;
       }
@@ -219,10 +233,12 @@ class _ProfilePageState extends State<ProfilePage> {
       // qui redirigera vers la page de connexion
       await user.delete();
 
-      // Pas besoin de navigation manuelle, le StreamBuilder dans main.dart s'en charge
-      // Le message sera affiché via ScaffoldMessenger global si nécessaire
+      // Fermer le loader si toujours monté
+      if (mounted) Navigator.pop(context);
+
+      // La redirection sera gérée automatiquement par le StreamBuilder dans main.dart
     } on FirebaseAuthException catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) Navigator.pop(context); // Fermer le loader
 
       if (e.code == 'requires-recent-login') {
         // Si la session est trop ancienne, demander à l'utilisateur de se reconnecter
@@ -232,7 +248,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        Navigator.pop(context); // Fermer le loader
         _showMessage('Erreur: $e');
       }
     }
