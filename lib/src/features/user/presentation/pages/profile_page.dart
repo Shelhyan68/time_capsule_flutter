@@ -215,15 +215,15 @@ class _ProfilePageState extends State<ProfilePage> {
       await _userService.deleteUserProfile(user.uid);
 
       // Supprimer le compte Firebase Auth
+      // La suppression du compte déclenchera automatiquement authStateChanges
+      // qui redirigera vers la page de connexion
       await user.delete();
 
-      if (!mounted) return;
-
-      // Rediriger vers la page de connexion
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-
-      _showMessage('Compte supprimé avec succès');
+      // Pas besoin de navigation manuelle, le StreamBuilder dans main.dart s'en charge
+      // Le message sera affiché via ScaffoldMessenger global si nécessaire
     } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+
       if (e.code == 'requires-recent-login') {
         // Si la session est trop ancienne, demander à l'utilisateur de se reconnecter
         _showMessage('Votre session a expiré. Veuillez vous déconnecter et vous reconnecter avant de supprimer votre compte.');
@@ -231,9 +231,10 @@ class _ProfilePageState extends State<ProfilePage> {
         _showMessage('Erreur Firebase: ${e.message}');
       }
     } catch (e) {
-      _showMessage('Erreur: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showMessage('Erreur: $e');
+      }
     }
   }
 
