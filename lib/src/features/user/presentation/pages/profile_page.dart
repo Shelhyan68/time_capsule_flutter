@@ -229,14 +229,15 @@ class _ProfilePageState extends State<ProfilePage> {
       await _userService.deleteUserProfile(user.uid);
 
       // Supprimer le compte Firebase Auth
-      // La suppression du compte déclenchera automatiquement authStateChanges
-      // qui redirigera vers la page de connexion
       await user.delete();
 
-      // Fermer le loader si toujours monté
-      if (mounted) Navigator.pop(context);
-
-      // La redirection sera gérée automatiquement par le StreamBuilder dans main.dart
+      // Fermer le loader et retourner à la racine
+      if (mounted) {
+        // Fermer le loader
+        Navigator.pop(context);
+        // Retourner à la racine (login) - forcer la navigation
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     } on FirebaseAuthException catch (e) {
       if (mounted) Navigator.pop(context); // Fermer le loader
 
