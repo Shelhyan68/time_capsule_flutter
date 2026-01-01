@@ -17,6 +17,8 @@ import 'src/features/user/data/user_service.dart';
 import 'src/features/user/domain/models/user_profile.dart';
 import 'src/features/user/presentation/pages/profile_setup_page.dart';
 import 'src/features/notifications/notification_service.dart';
+import 'src/core/services/app_update_service.dart';
+import 'src/core/widgets/update_dialog.dart';
 
 void main() async {
   // Wrapper pour capturer toutes les erreurs
@@ -56,6 +58,7 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp>
   final _authRepository = AuthRepository();
   late final UserService _userService;
   final _notificationService = NotificationService();
+  late final AppUpdateService _updateService;
 
   // Deep Links
   AppLinks? _appLinks;
@@ -64,6 +67,7 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp>
   // State
   final _navigatorKey = GlobalKey<NavigatorState>();
   bool _isProcessingLink = false;
+  bool _hasCheckedForUpdate = false;
 
   @override
   void initState() {
@@ -74,11 +78,38 @@ class _TimeCapsuleAppState extends State<TimeCapsuleApp>
         firestore: FirebaseFirestore.instance,
         auth: FirebaseAuth.instance,
       );
+      _updateService = AppUpdateService(
+        firestore: FirebaseFirestore.instance,
+      );
       _initDeepLinks();
       _initNotifications();
+      _checkForUpdates();
     } catch (e, stackTrace) {
       debugPrint('❌ Error in initState: $e');
       debugPrint('Stack trace: $stackTrace');
+    }
+  }
+
+  /// Vérifie si une mise à jour est disponible
+  Future<void> _checkForUpdates() async {
+    // Attendre un peu pour laisser l'UI se charger
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted || _hasCheckedForUpdate) return;
+
+    try {
+      final updateInfo = await _updateService.checkForUpdate();
+
+      if (updateInfo != null && mounted && _navigatorKey.currentContext != null) {
+        _hasCheckedForUpdate = true;
+        showDialog(
+          context: _navigatorKey.currentContext!,
+          barrierDismissible: !updateInfo.isRequired,
+          builder: (context) => UpdateDialog(updateInfo: updateInfo),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Erreur lors de la vérification de mise à jour: $e');
     }
   }
 
