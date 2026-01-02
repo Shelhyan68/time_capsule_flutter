@@ -204,6 +204,7 @@ class AuthRepository {
         }
 
         // Si toujours vide, utiliser "Utilisateur" par défaut
+        // Conforme aux guidelines Apple : ne pas redemander les informations
         if (firstName.isEmpty) {
           firstName = 'Utilisateur';
           debugPrint('⚠️ Aucun nom trouvé, utilisation du défaut: "Utilisateur"');
@@ -223,6 +224,28 @@ class AuthRepository {
         debugPrint('✅ Profil Apple créé automatiquement: $firstName $lastName');
       } else {
         debugPrint('ℹ️ Profil existant trouvé pour ${user.uid}');
+
+        // IMPORTANT: Si le profil existe déjà mais que l'utilisateur s'est reconnecté
+        // et qu'Apple a fourni de nouvelles informations, on met à jour
+        if (appleCredential.givenName != null && appleCredential.givenName!.isNotEmpty) {
+          final updates = <String, dynamic>{};
+
+          if (appleCredential.givenName != null) {
+            updates['firstName'] = appleCredential.givenName!;
+          }
+          if (appleCredential.familyName != null && appleCredential.familyName!.isNotEmpty) {
+            updates['lastName'] = appleCredential.familyName!;
+          }
+          if (appleCredential.email != null && appleCredential.email!.isNotEmpty) {
+            updates['email'] = appleCredential.email!;
+          }
+
+          if (updates.isNotEmpty) {
+            updates['updatedAt'] = Timestamp.now();
+            await _firestore.collection('users').doc(user.uid).update(updates);
+            debugPrint('✅ Profil Apple mis à jour avec les nouvelles informations');
+          }
+        }
       }
     }
 
