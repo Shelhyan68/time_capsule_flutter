@@ -225,12 +225,10 @@ class _ProfilePageState extends State<ProfilePage> {
       // Forcer la déconnexion
       await FirebaseAuth.instance.signOut();
 
-      // Navigation forcée vers la page de connexion
+      // Revenir à la racine (home widget dans main.dart)
+      // qui contient le StreamBuilder avec la logique d'authentification
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
-          (route) => false,
-        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
 
     } on FirebaseAuthException catch (e) {
